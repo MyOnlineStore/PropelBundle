@@ -30,7 +30,7 @@
     "ext-simplexml": "*",
     "propel/propel1": "^1.6.8",
     "sensio/framework-extra-bundle": "^5.2",
-    "symfony/framework-bundle": "^4.4"
+    "symfony/framework-bundle": "^3.4|^4.4"
   },
   "require-dev": {
     "fzaninotto/faker": "^1.5",
