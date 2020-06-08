@@ -29,20 +29,17 @@
     "ext-pdo": "*",
     "ext-simplexml": "*",
     "propel/propel1": "^1.6.8",
-    "sensio/framework-extra-bundle": "^5.2",
-    "symfony/config": "^3.4",
-    "symfony/console": "^3.4",
-    "symfony/debug": "^3.4",
-    "symfony/form": "^3.4",
-    "symfony/framework-bundle": "^3.4",
-    "symfony/security": "^3.4",
-    "symfony/translation": "^3.4"
+    "sensio/framework-extra-bundle": "^5.4",
+    "symfony/console": "^3.4|^4.4",
+    "symfony/form": "^3.4|^4.4",
+    "symfony/security": "^3.4|^4.4",
+    "symfony/translation": "^3.4|^4.4"
   },
   "require-dev": {
     "fzaninotto/faker": "^1.5",
     "phing/phing": "^2.12",
-    "phpunit/phpunit": "^4.8.21|^5.0.10",
-    "symfony/phpunit-bridge": "*"
+    "phpunit/phpunit": "^5.7",
+    "symfony/phpunit-bridge": "^5.1"
   },
   "conflict": {
     "symfony/propel1-bridge": ">=2.8.0"
