@@ -230,7 +230,7 @@ abstract class AbstractCommand extends ContainerAwareCommand
             $filesystem->mkdir($cacheDir);
         }
 
-        $base = ltrim(realpath($kernel->getRootDir().'/..'), DIRECTORY_SEPARATOR);
+        $base = ltrim(realpath($kernel->getProjectDir()), DIRECTORY_SEPARATOR);
 
         $finalSchemas = $this->getFinalSchemas($kernel, $this->bundle);
         foreach ($finalSchemas as $schema) {
@@ -354,7 +354,7 @@ abstract class AbstractCommand extends ContainerAwareCommand
     protected function createBuildPropertiesFile(KernelInterface $kernel, $file)
     {
         $filesystem = new Filesystem();
-        $buildPropertiesFile = $kernel->getRootDir().'/config/propel.ini';
+        $buildPropertiesFile = $kernel->getProjectDir().'/app/config/propel.ini';
 
         if (file_exists($buildPropertiesFile)) {
             $filesystem->copy($buildPropertiesFile, $file);
@@ -655,8 +655,8 @@ EOT;
         $properties = array_merge(array(
             'propel.database'           => 'mysql',
             'project.dir'               => $workingDirectory,
-            'propel.output.dir'         => $kernel->getRootDir().'/propel',
-            'propel.php.dir'            => $kernel->getRootDir().'/..',
+            'propel.output.dir'         => $kernel->getProjectDir().'/var/propel',
+            'propel.php.dir'            => $kernel->getProjectDir(),
             'propel.packageObjectModel' => true,
             'propel.useDateTimeClass'   => true,
             'propel.dateTimeClass'      => 'DateTime',
