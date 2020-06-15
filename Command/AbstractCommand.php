@@ -230,7 +230,7 @@ abstract class AbstractCommand extends ContainerAwareCommand
             $filesystem->mkdir($cacheDir);
         }
 
-        $base = ltrim(realpath($kernel->getProjectDir()), DIRECTORY_SEPARATOR);
+        $base = \ltrim(\realpath($kernel->getProjectDir()), DIRECTORY_SEPARATOR);
 
         $finalSchemas = $this->getFinalSchemas($kernel, $this->bundle);
         foreach ($finalSchemas as $schema) {
@@ -340,7 +340,7 @@ abstract class AbstractCommand extends ContainerAwareCommand
     protected function getRelativeFileName(\SplFileInfo $file)
     {
         return \substr(
-            \str_replace(realpath($this->getContainer()->getParameter('kernel.project_dir').'/'), '', $file),
+            \str_replace(\realpath($this->getContainer()->getParameter('kernel.project_dir').'/'), '', $file),
             1
         );
     }

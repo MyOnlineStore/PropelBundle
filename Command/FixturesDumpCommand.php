@@ -61,7 +61,7 @@ EOT
         list($name, $defaultConfig) = $this->getConnection($input, $output);
         $fixtureDir = $input->getOption('dir') ? $input->getOption('dir') : $this->defaultFixturesDir;
 
-        $path = realpath($this->getApplication()->getKernel()->getProjectDir() . '/') . '/' . $fixtureDir;
+        $path = \realpath($this->getApplication()->getKernel()->getProjectDir() . '/') . '/' . $fixtureDir;
 
         if (!file_exists($path)) {
             $output->writeln("<info>The $path folder does not exists.</info>");
