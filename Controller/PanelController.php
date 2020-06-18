@@ -27,17 +27,17 @@ class PanelController implements ContainerAwareInterface
      */
     public function configurationAction()
     {
-        $templating = $this->container->get('templating');
-
-        return $templating->renderResponse(
-            'PropelBundle:Panel:configuration.html.twig',
-            array(
-                'propel_version'     => \Propel::VERSION,
-                'configuration'      => $this->container->get('propel.configuration')->getParameters(),
-                'default_connection' => $this->container->getParameter('propel.dbal.default_connection'),
-                'logging'            => $this->container->getParameter('propel.logging'),
-                'path'               => $this->container->getParameter('propel.path'),
-                'phing_path'         => $this->container->getParameter('propel.phing_path'),
+        return new Response(
+            $this->container->get('twig')->render(
+                '@Propel/Panel/configuration.html.twig',
+                [
+                    'propel_version'     => \Propel::VERSION,
+                    'configuration'      => $this->container->get('propel.configuration')->getParameters(),
+                    'default_connection' => $this->container->getParameter('propel.dbal.default_connection'),
+                    'logging'            => $this->container->getParameter('propel.logging'),
+                    'path'               => $this->container->getParameter('propel.path'),
+                    'phing_path'         => $this->container->getParameter('propel.phing_path'),
+                ]
             )
         );
     }
@@ -76,11 +76,13 @@ class PanelController implements ContainerAwareInterface
             return new Response('<div class="error">This query cannot be explained.</div>');
         }
 
-        return $this->container->get('templating')->renderResponse(
-            'PropelBundle:Panel:explain.html.twig',
-            array(
-                'data' => $results,
-                'query' => $query,
+        return new Response(
+            $this->container->get('twig')->render(
+                '@Propel/Panel/explain.html.twig',
+                [
+                    'data' => $results,
+                    'query' => $query,
+                ]
             )
         );
     }
