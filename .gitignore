@@ -3,3 +3,4 @@ Model/*/om
 vendor
 composer.lock
 composer.phar
+.idea
