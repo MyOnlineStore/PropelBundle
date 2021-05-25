@@ -45,15 +45,13 @@ class PropelUserProvider implements UserProviderInterface
     protected $property;
 
     /**
-     * Default constructor.
-     *
      * @param string      $class    The User model class.
      * @param string|null $property The property to use to retrieve a user.
      */
     public function __construct($class, $property = null)
     {
         $this->class = $class;
-        $this->queryClass = $class.'Query';
+        $this->queryClass = $class . 'Query';
         $this->property = $property;
     }
 
@@ -66,14 +64,14 @@ class PropelUserProvider implements UserProviderInterface
         $query = $queryClass::create();
 
         if (null !== $this->property) {
-            $filter = 'filterBy'.ucfirst($this->property);
+            $filter = 'filterBy' . \ucfirst($this->property);
             $query->$filter($username);
         } else {
             $query->filterByUsername($username);
         }
 
         if (null === $user = $query->findOne()) {
-            throw new UsernameNotFoundException(sprintf('User "%s" not found.', $username));
+            throw new UsernameNotFoundException(\sprintf('User "%s" not found.', $username));
         }
 
         return $user;
@@ -85,7 +83,7 @@ class PropelUserProvider implements UserProviderInterface
     public function refreshUser(UserInterface $user)
     {
         if (!$user instanceof $this->class) {
-            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', get_class($user)));
+            throw new UnsupportedUserException(\sprintf('Instances of "%s" are not supported.', \get_class($user)));
         }
 
         $queryClass = $this->queryClass;

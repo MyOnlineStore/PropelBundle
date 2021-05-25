@@ -1,0 +1,35 @@
+name: CI
+
+on: push
+
+jobs:
+    test:
+        name: Test
+
+        runs-on: ubuntu-latest
+
+        steps:
+            # Setup
+            -   name: Checkout
+                uses: actions/checkout@v2
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: 7.2
+                    coverage: pcov
+                    tools: cs2pr
+
+            -   name: Cache Dependencies
+                uses: actions/cache@v1
+                with:
+                    path: ~/.composer/cache
+                    key: php7.2-composer-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: |
+                        php7.2-composer-
+            -   name: Install Dependencies
+                run: composer install --no-interaction --no-ansi --no-progress --no-suggest
+
+            -   name: PHPUnit Checks Matcher
+                run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+            -   name: Unit Tests
+                run: vendor/bin/phpunit --coverage-text

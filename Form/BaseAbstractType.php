@@ -7,9 +7,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 abstract class BaseAbstractType extends AbstractType
 {
-    protected $options = array(
+    protected $options = [
         'name' => '',
-    );
+    ];
 
     public function __construct($mergeOptions = null)
     {
@@ -40,21 +40,21 @@ abstract class BaseAbstractType extends AbstractType
 
     public function mergeOptions($options)
     {
-        $this->options = array_merge($this->options, $options);
+        $this->options = \array_merge($this->options, $options);
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritdoc}
      */
-    public function setDefaultOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults($this->options);
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritdoc}
      */
-    public function getName()
+    public function getBlockPrefix()
     {
         return $this->getOption('name');
     }

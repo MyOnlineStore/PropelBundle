@@ -7,6 +7,7 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Tests\DependencyInjection;
 
 use Propel\Bundle\PropelBundle\DependencyInjection\PropelExtension;
@@ -19,35 +20,43 @@ class PropelExtensionTest extends TestCase
         $container = $this->getContainer();
         $loader = new PropelExtension();
         try {
-            $loader->load(array(array()), $container);
+            $loader->load([[]], $container);
             $this->fail();
-        } catch (\Exception $e) {
-            $this->assertInstanceOf('InvalidArgumentException', $e,
-                '->load() throws an \InvalidArgumentException if the Propel path is not set');
+        } catch (\Throwable $e) {
+            self::assertInstanceOf(
+                'InvalidArgumentException',
+                $e,
+                '->load() throws an \InvalidArgumentException if the Propel path is not set'
+            );
         }
 
         $container = $this->getContainer();
         $loader = new PropelExtension();
         try {
-            $loader->load(array(array(
+            $loader->load([[
                 'path' => '/propel',
-                'dbal' => array(),
-            )), $container);
+                'dbal' => [],
+            ]
+            ], $container);
             $this->fail();
-        } catch (\Exception $e) {
-            $this->assertInstanceOf('InvalidArgumentException', $e,
-                '->load() throws an \InvalidArgumentException if the Phing path is not set.');
+        } catch (\Throwable $e) {
+            self::assertInstanceOf(
+                'InvalidArgumentException',
+                $e,
+                '->load() throws an \InvalidArgumentException if the Phing path is not set.'
+            );
         }
 
         $container = $this->getContainer();
         $loader = new PropelExtension();
-        $loader->load(array(array(
+        $loader->load([[
             'path'       => '/propel',
             'phing_path' => '/phing',
-            'dbal'       => array()
-        )), $container);
-        $this->assertEquals('/propel',  $container->getParameter('propel.path'), '->load() requires the Propel path');
-        $this->assertEquals('/phing',   $container->getParameter('propel.phing_path'), '->load() requires the Phing path');
+            'dbal'       => []
+        ]
+        ], $container);
+        self::assertEquals('/propel',  $container->getParameter('propel.path'), '->load() requires the Propel path');
+        self::assertEquals('/phing',   $container->getParameter('propel.phing_path'), '->load() requires the Phing path');
     }
 
     public function testDbalLoad()
@@ -55,40 +64,43 @@ class PropelExtensionTest extends TestCase
         $container = $this->getContainer();
         $loader = new PropelExtension();
 
-        $loader->load(array(array(
+        $loader->load([[
             'path'       => '/propel',
             'phing_path' => '/phing',
-            'dbal' => array(
+            'dbal' => [
                 'default_connection' => 'foo',
-            )
-        )), $container);
-        $this->assertEquals('foo', $container->getParameter('propel.dbal.default_connection'), '->dbalLoad() overrides existing configuration options');
+            ]
+        ]
+        ], $container);
+        self::assertEquals('foo', $container->getParameter('propel.dbal.default_connection'), '->dbalLoad() overrides existing configuration options');
 
         $container = $this->getContainer();
         $loader = new PropelExtension();
 
-        $loader->load(array(array(
+        $loader->load([[
             'path'          => '/propel',
             'phing_path'    => '/phing',
-            'dbal'          => array(
+            'dbal'          => [
                 'password' => 'foo',
-            )
-        )), $container);
+            ]
+        ]
+        ], $container);
 
         $arguments = $container->getDefinition('propel.configuration')->getArguments();
         $config = $arguments[0];
 
-        $this->assertEquals('foo', $config['datasources']['default']['connection']['password']);
-        $this->assertEquals('root', $config['datasources']['default']['connection']['user']);
+        self::assertEquals('foo', $config['datasources']['default']['connection']['password']);
+        self::assertEquals('root', $config['datasources']['default']['connection']['user']);
 
-        $loader->load(array(array(
+        $loader->load([[
             'path' => '/propel',
-            'dbal' => array(
+            'dbal' => [
                 'user' => 'foo',
-            )
-        )), $container);
-        $this->assertEquals('foo', $config['datasources']['default']['connection']['password']);
-        $this->assertEquals('root', $config['datasources']['default']['connection']['user']);
+            ]
+        ]
+        ], $container);
+        self::assertEquals('foo', $config['datasources']['default']['connection']['password']);
+        self::assertEquals('root', $config['datasources']['default']['connection']['user']);
 
     }
 
@@ -97,37 +109,39 @@ class PropelExtensionTest extends TestCase
         $container = $this->getContainer();
         $loader = new PropelExtension();
 
-        $config_base = array(
+        $config_base = [
             'path'       => '/propel',
             'phing_path' => '/propel',
-        );
+        ];
 
-        $config_prod = array('dbal' => array(
+        $config_prod = ['dbal' => [
             'user'      => 'toto',
             'password'  => 'titi',
             'dsn'       => 'foobar',
             'driver'    => 'my_driver',
-            'options'   => array('o1', 'o2')
-        ));
+            'options'   => ['o1', 'o2']
+        ]
+        ];
 
-        $config_dev = array('dbal' => array(
+        $config_dev = ['dbal' => [
             'user'      => 'toto_dev',
             'password'  => 'titi_dev',
             'dsn'       => 'foobar',
-        ));
+        ]
+        ];
 
-        $configs = array($config_base, $config_prod, $config_dev);
+        $configs = [$config_base, $config_prod, $config_dev];
 
         $loader->load($configs, $container);
 
         $arguments = $container->getDefinition('propel.configuration')->getArguments();
         $config = $arguments[0];
-        $this->assertEquals('toto_dev',  $config['datasources']['default']['connection']['user']);
-        $this->assertEquals('titi_dev',  $config['datasources']['default']['connection']['password']);
-        $this->assertEquals('foobar',    $config['datasources']['default']['connection']['dsn']);
-        $this->assertEquals('my_driver', $config['datasources']['default']['adapter']);
-        $this->assertEquals('o1',        $config['datasources']['default']['connection']['options'][0]);
-        $this->assertEquals('o2',        $config['datasources']['default']['connection']['options'][1]);
+        self::assertEquals('toto_dev',  $config['datasources']['default']['connection']['user']);
+        self::assertEquals('titi_dev',  $config['datasources']['default']['connection']['password']);
+        self::assertEquals('foobar',    $config['datasources']['default']['connection']['dsn']);
+        self::assertEquals('my_driver', $config['datasources']['default']['adapter']);
+        self::assertEquals('o1',        $config['datasources']['default']['connection']['options'][0]);
+        self::assertEquals('o2',        $config['datasources']['default']['connection']['options'][1]);
     }
 
     public function testDbalLoadMultipleConnections()
@@ -135,58 +149,60 @@ class PropelExtensionTest extends TestCase
         $container = $this->getContainer();
         $loader = new PropelExtension();
 
-        $config_base = array(
+        $config_base = [
             'path'       => '/propel',
             'phing_path' => '/phing',
-        );
+        ];
 
-        $config_mysql = array(
+        $config_mysql = [
             'user'      => 'mysql_usr',
             'password'  => 'mysql_pwd',
             'dsn'       => 'mysql_dsn',
             'driver'    => 'mysql',
-        );
+        ];
 
-        $config_sqlite = array(
+        $config_sqlite = [
             'user'      => 'sqlite_usr',
             'password'  => 'sqlite_pwd',
             'dsn'       => 'sqlite_dsn',
             'driver'    => 'sqlite',
-        );
+        ];
 
-        $config_connections = array(
+        $config_connections = [
             'default_connection' => 'sqlite',
-            'connections' => array('mysql' => $config_mysql, 'sqlite' => $config_sqlite,
-        ));
+            'connections' => ['mysql' => $config_mysql, 'sqlite' => $config_sqlite,
+            ]
+        ];
 
-        $configs = array($config_base, array('dbal' => $config_connections));
+        $configs = [$config_base, ['dbal' => $config_connections]];
 
         $loader->load($configs, $container);
 
         $arguments = $container->getDefinition('propel.configuration')->getArguments();
         $config = $arguments[0];
-        $this->assertEquals('sqlite', $container->getParameter('propel.dbal.default_connection'));
-        $this->assertEquals('sqlite_usr',  $config['datasources']['sqlite']['connection']['user']);
-        $this->assertEquals('sqlite_pwd',  $config['datasources']['sqlite']['connection']['password']);
-        $this->assertEquals('sqlite_dsn',  $config['datasources']['sqlite']['connection']['dsn']);
-        $this->assertEquals('sqlite',      $config['datasources']['sqlite']['adapter']);
+        self::assertEquals('sqlite', $container->getParameter('propel.dbal.default_connection'));
+        self::assertEquals('sqlite_usr',  $config['datasources']['sqlite']['connection']['user']);
+        self::assertEquals('sqlite_pwd',  $config['datasources']['sqlite']['connection']['password']);
+        self::assertEquals('sqlite_dsn',  $config['datasources']['sqlite']['connection']['dsn']);
+        self::assertEquals('sqlite',      $config['datasources']['sqlite']['adapter']);
 
-        $config_connections = array(
+        $config_connections = [
             'default_connection' => 'mysql',
-            'connections' => array('mysql' => $config_mysql, 'sqlite' => $config_sqlite,
-        ));
+            'connections' => ['mysql' => $config_mysql, 'sqlite' => $config_sqlite,
+            ]
+        ];
 
-        $configs = array($config_base, array('dbal' => $config_connections));
+        $configs = [$config_base, ['dbal' => $config_connections]];
 
         $loader->load($configs, $container);
 
         $arguments = $container->getDefinition('propel.configuration')->getArguments();
         $config = $arguments[0];
-        $this->assertEquals('mysql', $container->getParameter('propel.dbal.default_connection'));
-        $this->assertEquals('mysql_usr',  $config['datasources']['mysql']['connection']['user']);
-        $this->assertEquals('mysql_pwd',  $config['datasources']['mysql']['connection']['password']);
-        $this->assertEquals('mysql_dsn',  $config['datasources']['mysql']['connection']['dsn']);
-        $this->assertEquals('mysql',      $config['datasources']['mysql']['adapter']);
+        self::assertEquals('mysql', $container->getParameter('propel.dbal.default_connection'));
+        self::assertEquals('mysql_usr',  $config['datasources']['mysql']['connection']['user']);
+        self::assertEquals('mysql_pwd',  $config['datasources']['mysql']['connection']['password']);
+        self::assertEquals('mysql_dsn',  $config['datasources']['mysql']['connection']['dsn']);
+        self::assertEquals('mysql',      $config['datasources']['mysql']['adapter']);
     }
 
     public function testDbalWithMultipleConnectionsAndSettings()
@@ -194,42 +210,43 @@ class PropelExtensionTest extends TestCase
         $container = $this->getContainer();
         $loader = new PropelExtension();
 
-        $config_base = array(
+        $config_base = [
             'path'       => '/propel',
             'phing_path' => '/phing',
-        );
+        ];
 
-        $config_mysql = array(
+        $config_mysql = [
             'user'      => 'mysql_usr',
             'password'  => 'mysql_pwd',
             'dsn'       => 'mysql_dsn',
             'driver'    => 'mysql',
-            'settings'  => array(
-                'charset' => array('value' => 'UTF8'),
-            ),
-        );
+            'settings'  => [
+                'charset' => ['value' => 'UTF8'],
+            ],
+        ];
 
-        $config_connections = array(
+        $config_connections = [
             'default_connection'    => 'mysql',
-            'connections'           => array(
+            'connections'           => [
                 'mysql' => $config_mysql,
-        ));
+            ]
+        ];
 
-        $configs = array($config_base, array('dbal' => $config_connections));
+        $configs = [$config_base, ['dbal' => $config_connections]];
 
         $loader->load($configs, $container);
 
         $arguments = $container->getDefinition('propel.configuration')->getArguments();
         $config = $arguments[0];
-        $this->assertEquals('mysql', $container->getParameter('propel.dbal.default_connection'));
-        $this->assertEquals('mysql_usr',  $config['datasources']['mysql']['connection']['user']);
-        $this->assertEquals('mysql_pwd',  $config['datasources']['mysql']['connection']['password']);
-        $this->assertEquals('mysql_dsn',  $config['datasources']['mysql']['connection']['dsn']);
+        self::assertEquals('mysql', $container->getParameter('propel.dbal.default_connection'));
+        self::assertEquals('mysql_usr',  $config['datasources']['mysql']['connection']['user']);
+        self::assertEquals('mysql_pwd',  $config['datasources']['mysql']['connection']['password']);
+        self::assertEquals('mysql_dsn',  $config['datasources']['mysql']['connection']['dsn']);
 
-        $this->assertArrayHasKey('settings', $config['datasources']['mysql']['connection']);
-        $this->assertArrayHasKey('charset',  $config['datasources']['mysql']['connection']['settings']);
-        $this->assertArrayHasKey('value',    $config['datasources']['mysql']['connection']['settings']['charset']);
-        $this->assertEquals('UTF8', $config['datasources']['mysql']['connection']['settings']['charset']['value']);
+        self::assertArrayHasKey('settings', $config['datasources']['mysql']['connection']);
+        self::assertArrayHasKey('charset',  $config['datasources']['mysql']['connection']['settings']);
+        self::assertArrayHasKey('value',    $config['datasources']['mysql']['connection']['settings']['charset']);
+        self::assertEquals('UTF8', $config['datasources']['mysql']['connection']['settings']['charset']['value']);
     }
 
     public function testDbalWithSettings()
@@ -237,38 +254,38 @@ class PropelExtensionTest extends TestCase
         $container = $this->getContainer();
         $loader = new PropelExtension();
 
-        $config_base = array(
+        $config_base = [
             'path'       => '/propel',
             'phing_path' => '/phing',
-        );
+        ];
 
-        $config_mysql = array(
+        $config_mysql = [
             'user'      => 'mysql_usr',
             'password'  => 'mysql_pwd',
             'dsn'       => 'mysql_dsn',
             'driver'    => 'mysql',
-            'settings'  => array(
-                'charset' => array('value' => 'UTF8'),
-                'queries' => array('query' => 'SET NAMES UTF8')
-            ),
-        );
+            'settings'  => [
+                'charset' => ['value' => 'UTF8'],
+                'queries' => ['query' => 'SET NAMES UTF8']
+            ],
+        ];
 
-        $configs = array($config_base, array('dbal' => $config_mysql));
+        $configs = [$config_base, ['dbal' => $config_mysql]];
 
         $loader->load($configs, $container);
 
         $arguments = $container->getDefinition('propel.configuration')->getArguments();
         $config = $arguments[0];
 
-        $this->assertArrayHasKey('settings', $config['datasources']['default']['connection']);
-        $this->assertArrayHasKey('charset',  $config['datasources']['default']['connection']['settings']);
-        $this->assertArrayHasKey('value',    $config['datasources']['default']['connection']['settings']['charset']);
-        $this->assertEquals('UTF8', $config['datasources']['default']['connection']['settings']['charset']['value']);
+        self::assertArrayHasKey('settings', $config['datasources']['default']['connection']);
+        self::assertArrayHasKey('charset',  $config['datasources']['default']['connection']['settings']);
+        self::assertArrayHasKey('value',    $config['datasources']['default']['connection']['settings']['charset']);
+        self::assertEquals('UTF8', $config['datasources']['default']['connection']['settings']['charset']['value']);
 
-        $this->assertArrayHasKey('settings', $config['datasources']['default']['connection']);
-        $this->assertArrayHasKey('queries',  $config['datasources']['default']['connection']['settings']);
-        $this->assertArrayHasKey('query',    $config['datasources']['default']['connection']['settings']['queries']);
-        $this->assertEquals('SET NAMES UTF8', $config['datasources']['default']['connection']['settings']['queries']['query']);
+        self::assertArrayHasKey('settings', $config['datasources']['default']['connection']);
+        self::assertArrayHasKey('queries',  $config['datasources']['default']['connection']['settings']);
+        self::assertArrayHasKey('query',    $config['datasources']['default']['connection']['settings']['queries']);
+        self::assertEquals('SET NAMES UTF8', $config['datasources']['default']['connection']['settings']['queries']['query']);
     }
 
     public function testDbalWithSlaves()
@@ -276,59 +293,60 @@ class PropelExtensionTest extends TestCase
         $container = $this->getContainer();
         $loader = new PropelExtension();
 
-        $config_base = array(
+        $config_base = [
             'path'       => '/propel',
             'phing_path' => '/phing',
-        );
+        ];
 
-        $config_mysql = array(
+        $config_mysql = [
             'user'      => 'mysql_usr',
             'password'  => 'mysql_pwd',
             'dsn'       => 'mysql_dsn',
             'driver'    => 'mysql',
-            'slaves'  => array(
-                'mysql_slave1' => array(
+            'slaves'  => [
+                'mysql_slave1' => [
                     'user' => 'mysql_usrs1',
                     'password' => 'mysql_pwds1',
                     'dsn' => 'mysql_dsns1',
-                ),
-                'mysql_slave2' => array(
+                ],
+                'mysql_slave2' => [
                     'user' => 'mysql_usrs2',
                     'password' => 'mysql_pwds2',
                     'dsn' => 'mysql_dsns2',
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
 
-        $configs = array($config_base, array(
-            'dbal' => array(
+        $configs = [$config_base, [
+            'dbal' => [
                 'default_connection' => 'master',
-                'connections'        => array('master' => $config_mysql)
-            )
-        ));
+                'connections'        => ['master' => $config_mysql]
+            ]
+        ]
+        ];
         $loader->load($configs, $container);
 
         $arguments = $container->getDefinition('propel.configuration')->getArguments();
         $config = $arguments[0];
 
-        $this->assertArrayHasKey('slaves', $config['datasources']['master']);
-        $this->assertArrayHasKey('connection', $config['datasources']['master']['slaves']);
-        $this->assertArrayHasKey('mysql_slave1', $config['datasources']['master']['slaves']['connection']);
-        $this->assertArrayHasKey('user', $config['datasources']['master']['slaves']['connection']['mysql_slave1']);
-        $this->assertArrayHasKey('password', $config['datasources']['master']['slaves']['connection']['mysql_slave1']);
-        $this->assertArrayHasKey('dsn', $config['datasources']['master']['slaves']['connection']['mysql_slave1']);
-        $this->assertArrayHasKey('mysql_slave2', $config['datasources']['master']['slaves']['connection']);
-        $this->assertArrayHasKey('user', $config['datasources']['master']['slaves']['connection']['mysql_slave2']);
-        $this->assertArrayHasKey('password', $config['datasources']['master']['slaves']['connection']['mysql_slave2']);
-        $this->assertArrayHasKey('dsn', $config['datasources']['master']['slaves']['connection']['mysql_slave2']);
+        self::assertArrayHasKey('slaves', $config['datasources']['master']);
+        self::assertArrayHasKey('connection', $config['datasources']['master']['slaves']);
+        self::assertArrayHasKey('mysql_slave1', $config['datasources']['master']['slaves']['connection']);
+        self::assertArrayHasKey('user', $config['datasources']['master']['slaves']['connection']['mysql_slave1']);
+        self::assertArrayHasKey('password', $config['datasources']['master']['slaves']['connection']['mysql_slave1']);
+        self::assertArrayHasKey('dsn', $config['datasources']['master']['slaves']['connection']['mysql_slave1']);
+        self::assertArrayHasKey('mysql_slave2', $config['datasources']['master']['slaves']['connection']);
+        self::assertArrayHasKey('user', $config['datasources']['master']['slaves']['connection']['mysql_slave2']);
+        self::assertArrayHasKey('password', $config['datasources']['master']['slaves']['connection']['mysql_slave2']);
+        self::assertArrayHasKey('dsn', $config['datasources']['master']['slaves']['connection']['mysql_slave2']);
 
-        $this->assertEquals("mysql_usrs1", $config['datasources']['master']['slaves']['connection']['mysql_slave1']['user']);
-        $this->assertEquals("mysql_pwds1", $config['datasources']['master']['slaves']['connection']['mysql_slave1']['password']);
-        $this->assertEquals("mysql_dsns1", $config['datasources']['master']['slaves']['connection']['mysql_slave1']['dsn']);
+        self::assertEquals('mysql_usrs1', $config['datasources']['master']['slaves']['connection']['mysql_slave1']['user']);
+        self::assertEquals('mysql_pwds1', $config['datasources']['master']['slaves']['connection']['mysql_slave1']['password']);
+        self::assertEquals('mysql_dsns1', $config['datasources']['master']['slaves']['connection']['mysql_slave1']['dsn']);
 
-        $this->assertEquals("mysql_usrs2", $config['datasources']['master']['slaves']['connection']['mysql_slave2']['user']);
-        $this->assertEquals("mysql_pwds2", $config['datasources']['master']['slaves']['connection']['mysql_slave2']['password']);
-        $this->assertEquals("mysql_dsns2", $config['datasources']['master']['slaves']['connection']['mysql_slave2']['dsn']);
+        self::assertEquals('mysql_usrs2', $config['datasources']['master']['slaves']['connection']['mysql_slave2']['user']);
+        self::assertEquals('mysql_pwds2', $config['datasources']['master']['slaves']['connection']['mysql_slave2']['password']);
+        self::assertEquals('mysql_dsns2', $config['datasources']['master']['slaves']['connection']['mysql_slave2']['dsn']);
     }
 
     public function testDbalWithNoSlaves()
@@ -336,25 +354,24 @@ class PropelExtensionTest extends TestCase
         $container = $this->getContainer();
         $loader = new PropelExtension();
 
-        $config_base = array(
+        $config_base = [
             'path'       => '/propel',
             'phing_path' => '/phing',
-        );
+        ];
 
-        $config_mysql = array(
+        $config_mysql = [
             'user'      => 'mysql_usr',
             'password'  => 'mysql_pwd',
             'dsn'       => 'mysql_dsn',
             'driver'    => 'mysql'
-        );
+        ];
 
-        $configs = array($config_base, array('dbal' => $config_mysql));
+        $configs = [$config_base, ['dbal' => $config_mysql]];
         $loader->load($configs, $container);
 
         $arguments = $container->getDefinition('propel.configuration')->getArguments();
         $config = $arguments[0];
 
-        $this->assertArrayNotHasKey('slaves', $config['datasources']['default']);
+        self::assertArrayNotHasKey('slaves', $config['datasources']['default']);
     }
-
 }

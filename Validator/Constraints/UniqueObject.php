@@ -7,11 +7,16 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+
+use function count;
+use function is_array;
+use function is_string;
 
 /**
  * Constraint for the Unique Object validator
@@ -34,7 +39,7 @@ class UniqueObject extends Constraint
     /**
      * @var array
      */
-    public $fields = array();
+    public $fields = [];
 
     /**
      * @var string Used to set the path where the error will be attached, default is global.
@@ -45,15 +50,15 @@ class UniqueObject extends Constraint
     {
         parent::__construct($options);
 
-        if (!is_array($this->fields) && !is_string($this->fields)) {
+        if (!\is_array($this->fields) && !\is_string($this->fields)) {
             throw new UnexpectedTypeException($this->fields, 'array');
         }
 
-        if (0 === count($this->fields)) {
-            throw new ConstraintDefinitionException("At least one field must be specified.");
+        if (0 === \count($this->fields)) {
+            throw new ConstraintDefinitionException('At least one field must be specified.');
         }
 
-        if (null !== $this->errorPath && !is_string($this->errorPath)) {
+        if (null !== $this->errorPath && !\is_string($this->errorPath)) {
             throw new UnexpectedTypeException($this->errorPath, 'string or null');
         }
     }
@@ -63,7 +68,7 @@ class UniqueObject extends Constraint
      */
     public function getRequiredOptions()
     {
-        return array('fields');
+        return ['fields'];
     }
 
     /**

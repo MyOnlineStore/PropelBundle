@@ -7,8 +7,10 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Command;
 
+use Propel\Bundle\PropelBundle\Command\AbstractCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -37,15 +39,15 @@ class DatabaseCreateCommand extends AbstractCommand
      *
      * @throws \InvalidArgumentException When the target directory does not exist
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        list($name, $config) = $this->getConnection($input, $output);
+        [$name, $config] = $this->getConnection($input, $output);
         $dbName = $this->parseDbName($config['connection']['dsn']);
 
         if (null === $dbName) {
-            return $output->writeln('<error>No database name found.</error>');
+            return (int) $output->writeln('<error>No database name found.</error>');
         } else {
-            $query  = 'CREATE DATABASE '. $dbName .';';
+            $query  = 'CREATE DATABASE ' . $dbName . ';';
         }
 
         try {
@@ -55,14 +57,16 @@ class DatabaseCreateCommand extends AbstractCommand
             $statement = $connection->prepare($query);
             $statement->execute();
 
-            $output->writeln(sprintf('<info>Database <comment>%s</comment> has been created.</info>', $dbName));
-        } catch (\Exception $e) {
-            $this->writeSection($output, array(
+            $output->writeln(\sprintf('<info>Database <comment>%s</comment> has been created.</info>', $dbName));
+        } catch (\Throwable $exception) {
+            $this->writeSection($output, [
                 '[Propel] Exception caught',
                 '',
-                $e->getMessage()
-            ), 'fg=white;bg=red');
+                $exception->getMessage()
+            ], 'fg=white;bg=red');
         }
+
+        return 0;
     }
 
     /**
@@ -73,20 +77,21 @@ class DatabaseCreateCommand extends AbstractCommand
      *
      * @param  string $name   A connection name.
      * @param  array  $config A Propel connection configuration.
+     *
      * @return array
      */
     protected function getTemporaryConfiguration($name, $config)
     {
         $dbName = $this->parseDbName($config['connection']['dsn']);
 
-        $config['connection']['dsn'] = preg_replace(
-            '#dbname='.$dbName.'(;|$)#',
+        $config['connection']['dsn'] = \preg_replace(
+            '#dbname=' . $dbName . '(;|$)#',
             '',
             $config['connection']['dsn']
         );
 
-        return array(
-            'datasources' => array($name => $config)
-        );
+        return [
+            'datasources' => [$name => $config]
+        ];
     }
 }

@@ -43,8 +43,6 @@ class PropelLogger implements \BasicLogger
     protected $stopwatch;
 
     /**
-     * Constructor.
-     *
      * @param LoggerInterface $logger    A LoggerInterface instance
      * @param Stopwatch       $stopwatch A Stopwatch instance
      */
@@ -78,11 +76,11 @@ class PropelLogger implements \BasicLogger
         $add = true;
 
         if (null !== $this->stopwatch) {
-            $trace = debug_backtrace();
+            $trace = \debug_backtrace();
             $method = $trace[2]['args'][2];
 
-            $watch = 'Propel Query '.(count($this->queries) + 1);
-            if ('PropelPDO::prepare' === $method) {
+            $watch = 'Propel Query ' . (\count($this->queries) + 1);
+            if (\PropelPDO::class . '::prepare' === $method) {
                 $this->isPrepared = true;
                 $this->stopwatch->start($watch, 'propel');
 
@@ -131,7 +129,7 @@ class PropelLogger implements \BasicLogger
     public function log($message, $severity = null)
     {
         if (null !== $this->logger) {
-            $message = is_string($message) ? $message : var_export($message, true);
+            $message = \is_string($message) ? $message : \var_export($message, true);
 
             switch ($severity) {
                 case 'alert':

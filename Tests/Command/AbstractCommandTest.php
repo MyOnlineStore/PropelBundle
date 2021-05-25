@@ -7,12 +7,18 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Tests\Command;
 
 use Propel\Bundle\PropelBundle\Command\AbstractCommand;
 use Propel\Bundle\PropelBundle\Tests\TestCase;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
+
+use function is_array;
+use function realpath;
+
+use const DIRECTORY_SEPARATOR;
 
 /**
  * @author William Durand <william.durand1@gmail.com>
@@ -24,7 +30,7 @@ class AbstractCommandTest extends TestCase
      */
     protected $command;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->command = new TestableAbstractCommand('testable-command');
     }
@@ -32,52 +38,52 @@ class AbstractCommandTest extends TestCase
     public function testParseDbName()
     {
         $dsn = 'mydsn#dbname=foo';
-        $this->assertEquals('foo', $this->command->parseDbName($dsn));
+        self::assertEquals('foo', $this->command->parseDbName($dsn));
     }
 
     public function testParseDbNameWithoutDbName()
     {
-        $this->assertNull($this->command->parseDbName('foo'));
+        self::assertNull($this->command->parseDbName('foo'));
     }
 
     public function testTransformToLogicalName()
     {
-        $bundleDir = realpath(__DIR__ . '/../Fixtures/src/My/SuperBundle');
-        $filename = 'Resources' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'a-schema.xml';
+        $bundleDir = \realpath(__DIR__ . '/../Fixtures/src/My/SuperBundle');
+        $filename = 'Resources' . \DIRECTORY_SEPARATOR . 'config' . \DIRECTORY_SEPARATOR . 'a-schema.xml';
 
         $bundle = $this->getMockBuilder('Symfony\Component\HttpKernel\Bundle\BundleInterface')->getMock();
         $bundle
             ->expects($this->once())
             ->method('getName')
-            ->will($this->returnValue('MySuperBundle'));
+            ->willReturn('MySuperBundle');
         $bundle
             ->expects($this->once())
             ->method('getPath')
-            ->will($this->returnValue($bundleDir));
+            ->willReturn($bundleDir);
 
-        $schema = new \SplFileInfo($bundleDir . DIRECTORY_SEPARATOR . $filename);
+        $schema = new \SplFileInfo($bundleDir . \DIRECTORY_SEPARATOR . $filename);
         $expected = '@MySuperBundle/Resources/config/a-schema.xml';
-        $this->assertEquals($expected, $this->command->transformToLogicalName($schema, $bundle));
+        self::assertEquals($expected, $this->command->transformToLogicalName($schema, $bundle));
     }
 
     public function testTransformToLogicalNameWithSubDir()
     {
-        $bundleDir = realpath(__DIR__ . '/../Fixtures/src/My/ThirdBundle');
-        $filename = 'Resources' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'propel' . DIRECTORY_SEPARATOR . 'schema.xml';
+        $bundleDir = \realpath(__DIR__ . '/../Fixtures/src/My/ThirdBundle');
+        $filename = 'Resources' . \DIRECTORY_SEPARATOR . 'config' . \DIRECTORY_SEPARATOR . 'propel' . \DIRECTORY_SEPARATOR . 'schema.xml';
 
         $bundle = $this->getMockBuilder('Symfony\Component\HttpKernel\Bundle\BundleInterface')->getMock();
         $bundle
             ->expects($this->once())
             ->method('getName')
-            ->will($this->returnValue('MyThirdBundle'));
+            ->willReturn('MyThirdBundle');
         $bundle
             ->expects($this->once())
             ->method('getPath')
-            ->will($this->returnValue($bundleDir));
+            ->willReturn($bundleDir);
 
-        $schema = new \SplFileInfo($bundleDir . DIRECTORY_SEPARATOR . $filename);
+        $schema = new \SplFileInfo($bundleDir . \DIRECTORY_SEPARATOR . $filename);
         $expected = '@MyThirdBundle/Resources/config/propel/schema.xml';
-        $this->assertEquals($expected, $this->command->transformToLogicalName($schema, $bundle));
+        self::assertEquals($expected, $this->command->transformToLogicalName($schema, $bundle));
     }
 
     public function testGetSchemasFromBundle()
@@ -86,25 +92,25 @@ class AbstractCommandTest extends TestCase
         $bundle
             ->expects($this->once())
             ->method('getName')
-            ->will($this->returnValue('MySuperBundle'));
+            ->willReturn('MySuperBundle');
         $bundle
             ->expects($this->exactly(2))
             ->method('getPath')
-            ->will($this->returnValue(__DIR__ . '/../Fixtures/src/My/SuperBundle'));
+            ->willReturn(__DIR__ . '/../Fixtures/src/My/SuperBundle');
 
-        $aSchema = realpath(__DIR__ . '/../Fixtures/src/My/SuperBundle/Resources/config/a-schema.xml');
+        $aSchema = \realpath(__DIR__ . '/../Fixtures/src/My/SuperBundle/Resources/config/a-schema.xml');
 
         // hack to by pass the file locator
         $this->command->setLocateResponse($aSchema);
 
         $schemas = $this->command->getSchemasFromBundle($bundle);
 
-        $this->assertNotNull($schemas);
-        $this->assertTrue(is_array($schemas));
-        $this->assertCount(1, $schemas);
-        $this->assertArrayHasKey($aSchema, $schemas);
-        $this->assertSame($bundle, $schemas[$aSchema][0]);
-        $this->assertEquals(new \SplFileInfo($aSchema), $schemas[$aSchema][1]);
+        self::assertNotNull($schemas);
+        self::assertTrue(\is_array($schemas));
+        self::assertCount(1, $schemas);
+        self::assertArrayHasKey($aSchema, $schemas);
+        self::assertSame($bundle, $schemas[$aSchema][0]);
+        self::assertEquals(new \SplFileInfo($aSchema), $schemas[$aSchema][1]);
     }
 
     public function testGetSchemasFromBundleWithNoSchema()
@@ -113,13 +119,13 @@ class AbstractCommandTest extends TestCase
         $bundle
             ->expects($this->once())
             ->method('getPath')
-            ->will($this->returnValue(__DIR__ . '/../Fixtures/src/My/SecondBundle'));
+            ->willReturn(__DIR__ . '/../Fixtures/src/My/SecondBundle');
 
         $schemas = $this->command->getSchemasFromBundle($bundle);
 
-        $this->assertNotNull($schemas);
-        $this->assertTrue(is_array($schemas));
-        $this->assertCount(0, $schemas);
+        self::assertNotNull($schemas);
+        self::assertTrue(\is_array($schemas));
+        self::assertCount(0, $schemas);
     }
 
     public function testGetFinalSchemasWithNoSchemaInBundles()
@@ -130,18 +136,18 @@ class AbstractCommandTest extends TestCase
         $bundle
             ->expects($this->once())
             ->method('getPath')
-            ->will($this->returnValue(__DIR__ . '/../Fixtures/src/My/SecondBundle'));
+            ->willReturn(__DIR__ . '/../Fixtures/src/My/SecondBundle');
 
         $kernel
             ->expects($this->once())
             ->method('getBundles')
-            ->will($this->returnValue(array($bundle)));
+            ->willReturn([$bundle]);
 
         $schemas = $this->command->getFinalSchemas($kernel);
 
-        $this->assertNotNull($schemas);
-        $this->assertTrue(is_array($schemas));
-        $this->assertCount(0, $schemas);
+        self::assertNotNull($schemas);
+        self::assertTrue(\is_array($schemas));
+        self::assertCount(0, $schemas);
     }
 
     public function testGetFinalSchemas()
@@ -152,13 +158,13 @@ class AbstractCommandTest extends TestCase
         $bundle
             ->expects($this->once())
             ->method('getName')
-            ->will($this->returnValue('MySuperBundle'));
+            ->willReturn('MySuperBundle');
         $bundle
             ->expects($this->exactly(2))
             ->method('getPath')
-            ->will($this->returnValue(__DIR__ . '/../Fixtures/src/My/SuperBundle'));
+            ->willReturn(__DIR__ . '/../Fixtures/src/My/SuperBundle');
 
-        $aSchema = realpath(__DIR__ . '/../Fixtures/src/My/SuperBundle/Resources/config/a-schema.xml');
+        $aSchema = \realpath(__DIR__ . '/../Fixtures/src/My/SuperBundle/Resources/config/a-schema.xml');
 
         // hack to by pass the file locator
         $this->command->setLocateResponse($aSchema);
@@ -166,16 +172,16 @@ class AbstractCommandTest extends TestCase
         $kernel
             ->expects($this->once())
             ->method('getBundles')
-            ->will($this->returnValue(array($bundle)));
+            ->willReturn([$bundle]);
 
         $schemas = $this->command->getFinalSchemas($kernel);
 
-        $this->assertNotNull($schemas);
-        $this->assertTrue(is_array($schemas));
-        $this->assertCount(1, $schemas);
-        $this->assertArrayHasKey($aSchema, $schemas);
-        $this->assertSame($bundle, $schemas[$aSchema][0]);
-        $this->assertEquals(new \SplFileInfo($aSchema), $schemas[$aSchema][1]);
+        self::assertNotNull($schemas);
+        self::assertTrue(\is_array($schemas));
+        self::assertCount(1, $schemas);
+        self::assertArrayHasKey($aSchema, $schemas);
+        self::assertSame($bundle, $schemas[$aSchema][0]);
+        self::assertEquals(new \SplFileInfo($aSchema), $schemas[$aSchema][1]);
     }
 
     public function testGetFinalSchemasWithGivenBundle()
@@ -186,13 +192,13 @@ class AbstractCommandTest extends TestCase
         $bundle
             ->expects($this->once())
             ->method('getName')
-            ->will($this->returnValue('MySuperBundle'));
+            ->willReturn('MySuperBundle');
         $bundle
             ->expects($this->exactly(2))
             ->method('getPath')
-            ->will($this->returnValue(__DIR__ . '/../Fixtures/src/My/SuperBundle'));
+            ->willReturn(__DIR__ . '/../Fixtures/src/My/SuperBundle');
 
-        $aSchema = realpath(__DIR__ . '/../Fixtures/src/My/SuperBundle/Resources/config/a-schema.xml');
+        $aSchema = \realpath(__DIR__ . '/../Fixtures/src/My/SuperBundle/Resources/config/a-schema.xml');
 
         // hack to by pass the file locator
         $this->command->setLocateResponse($aSchema);
@@ -203,12 +209,12 @@ class AbstractCommandTest extends TestCase
 
         $schemas = $this->command->getFinalSchemas($kernel, $bundle);
 
-        $this->assertNotNull($schemas);
-        $this->assertTrue(is_array($schemas));
-        $this->assertCount(1, $schemas);
-        $this->assertArrayHasKey($aSchema, $schemas);
-        $this->assertSame($bundle, $schemas[$aSchema][0]);
-        $this->assertEquals(new \SplFileInfo($aSchema), $schemas[$aSchema][1]);
+        self::assertNotNull($schemas);
+        self::assertTrue(\is_array($schemas));
+        self::assertCount(1, $schemas);
+        self::assertArrayHasKey($aSchema, $schemas);
+        self::assertSame($bundle, $schemas[$aSchema][0]);
+        self::assertEquals(new \SplFileInfo($aSchema), $schemas[$aSchema][1]);
     }
 }
 

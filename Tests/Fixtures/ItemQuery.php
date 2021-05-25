@@ -11,9 +11,13 @@
 
 namespace Propel\Bundle\PropelBundle\Tests\Fixtures;
 
+use function array_keys;
+use function in_array;
+use function strtolower;
+
 class ItemQuery
 {
-    private $map = array(
+    private $map = [
         'id' => \PropelColumnTypes::INTEGER,
         'value' => \PropelColumnTypes::VARCHAR,
         'price' => \PropelColumnTypes::FLOAT,
@@ -21,14 +25,14 @@ class ItemQuery
         'slug' => \PropelColumnTypes::VARCHAR,
         'enabled' => \PropelColumnTypes::BOOLEAN_EMU,
         'updated_at' => \PropelColumnTypes::TIMESTAMP,
-    );
+    ];
 
-    private $caseInsensitiveMap = array(
+    private $caseInsensitiveMap = [
         'isactive' => 'is_active',
         'updatedat' => 'updated_at',
-    );
+    ];
 
-    public static $result = array();
+    public static $result = [];
 
     public function find()
     {
@@ -53,7 +57,7 @@ class ItemQuery
         $cm->setType('INTEGER');
         $cm->setPhpName('Id');
 
-        return array('id' => $cm);
+        return ['id' => $cm];
     }
 
     /**
@@ -61,7 +65,7 @@ class ItemQuery
      */
     public function hasColumn($column)
     {
-        return in_array($column, array_keys($this->map));
+        return \in_array($column, \array_keys($this->map));
     }
 
     /**
@@ -79,9 +83,9 @@ class ItemQuery
      */
     public function hasColumnByInsensitiveCase($column)
     {
-        $column = strtolower($column);
+        $column = \strtolower($column);
 
-        return in_array($column, array_keys($this->caseInsensitiveMap));
+        return \in_array($column, \array_keys($this->caseInsensitiveMap));
     }
 
     /**
@@ -89,7 +93,7 @@ class ItemQuery
      */
     public function getColumnByInsensitiveCase($column)
     {
-        $column = strtolower($column);
+        $column = \strtolower($column);
 
         if (isset($this->caseInsensitiveMap[$column])) {
             return $this->getColumn($this->caseInsensitiveMap[$column]);
@@ -121,10 +125,10 @@ class ItemQuery
         $resellerRelation->setType(\RelationMap::MANY_TO_MANY);
         $resellerRelation->setLocalTable($resellerTable);
 
-        return array(
+        return [
             $mainAuthorRelation,
             $authorRelation,
             $resellerRelation,
-        );
+        ];
     }
 }

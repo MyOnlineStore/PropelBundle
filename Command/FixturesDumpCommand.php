@@ -7,8 +7,10 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Command;
 
+use Propel\Bundle\PropelBundle\Command\AbstractCommand;
 use Propel\Bundle\PropelBundle\DataFixtures\Dumper\YamlDataDumper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -24,6 +26,7 @@ class FixturesDumpCommand extends AbstractCommand
 {
     /**
      * Default fixtures directory.
+     *
      * @var string
      */
     private $defaultFixturesDir = 'app/propel/fixtures';
@@ -56,40 +59,41 @@ EOT
      *
      * @throws \InvalidArgumentException When the target directory does not exist
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        list($name, $defaultConfig) = $this->getConnection($input, $output);
+        [$name, $defaultConfig] = $this->getConnection($input, $output);
         $fixtureDir = $input->getOption('dir') ? $input->getOption('dir') : $this->defaultFixturesDir;
 
         $path = \realpath($this->getApplication()->getKernel()->getProjectDir() . '/') . '/' . $fixtureDir;
 
-        if (!file_exists($path)) {
-            $output->writeln("<info>The $path folder does not exists.</info>");
-            if ($this->askConfirmation($output, "<question>Do you want me to create it for you ?</question> [Yes]")) {
+        if (!\file_exists($path)) {
+            $output->writeln(\sprintf('<info>The %s folder does not exists.</info>', $path));
+            if ($this->askConfirmation($output, '<question>Do you want me to create it for you ?</question> [Yes]')) {
                 $fs = new Filesystem();
                 $fs->mkdir($path);
             } else {
-                throw new \IOException(sprintf('Unable to find the %s folder', $path));
+                throw new \IOException(\sprintf('Unable to find the %s folder', $path));
             }
         }
 
-        $filename = $path . '/fixtures_' . time() . '.yml';
+        $filename = $path . '/fixtures_' . \time() . '.yml';
 
-        $dumper = new YamlDataDumper($this->getApplication()->getKernel()->getProjectDir().'/app');
+        $dumper = new YamlDataDumper($this->getApplication()->getKernel()->getProjectDir() . '/app');
 
         try {
             $dumper->dump($filename, $name);
-        } catch (\Exception $e) {
-            $this->writeSection($output, array(
+        } catch (\Throwable $exception) {
+            $this->writeSection($output, [
                 '[Propel] Exception',
                 '',
-                $e->getMessage()), 'fg=white;bg=red');
+                $exception->getMessage()
+            ], 'fg=white;bg=red');
 
-            return false;
+            return (int) false;
         }
 
         $this->writeNewFile($output, $filename);
 
-        return true;
+        return (int) true;
     }
 }

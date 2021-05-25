@@ -7,7 +7,10 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\DataFixtures\Loader;
+
+use Propel\Bundle\PropelBundle\DataFixtures\Loader\AbstractDataLoader;
 
 /**
  * XML fixtures loader.
@@ -21,18 +24,19 @@ class XmlDataLoader extends AbstractDataLoader
      */
     protected function transformDataToArray($file)
     {
-        $xml = simplexml_load_file($file);
+        $xml = \simplexml_load_file($file);
 
         return $this->simpleXmlToArray($xml);
     }
 
     /**
      * @param  \SimpleXMLElement $xml
+     *
      * @return array
      */
     protected function simpleXmlToArray($xml)
     {
-        $array = array();
+        $array = [];
         if ($xml instanceof \SimpleXMLElement) {
             foreach ($xml as $key => $value) {
                 // First make a valid key which is the Ns (Namespace) attribute
@@ -44,9 +48,9 @@ class XmlDataLoader extends AbstractDataLoader
                     }
                 }
 
-                $array[$key] = array();
+                $array[$key] = [];
                 foreach ($value as $elementKey => $elementValue) {
-                    $array[$key][$elementKey] = array();
+                    $array[$key][$elementKey] = [];
 
                     foreach ($elementValue->attributes() as $subkey => $subvalue) {
                         $array[$key][$elementKey][$subkey] = (string) $subvalue;

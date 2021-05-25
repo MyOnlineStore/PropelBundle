@@ -7,21 +7,24 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Tests;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
+
+use function file_exists;
 
 /**
  * TestCase
  *
  * @author William DURAND <william.durand1@gmail.com>
  */
-class TestCase extends \PHPUnit_Framework_TestCase
+class TestCase extends \PHPUnit\Framework\TestCase
 {
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
-        if (!file_exists($file = __DIR__ . '/../vendor/propel/propel1/runtime/lib/Propel.php')) {
+        if (!\file_exists($file = __DIR__ . '/../vendor/propel/propel1/runtime/lib/Propel.php')) {
             self::markTestSkipped('Propel is not available.');
         }
 
@@ -30,10 +33,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     public function getContainer()
     {
-        return new ContainerBuilder(new ParameterBag(array(
+        return new ContainerBuilder(new ParameterBag([
             'kernel.debug'      => false,
             'kernel.project_dir'   => __DIR__ . '/',
-        )));
+        ]));
     }
 
     protected function loadPropelQuickBuilder()

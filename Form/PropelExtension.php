@@ -11,6 +11,10 @@
 
 namespace Propel\Bundle\PropelBundle\Form;
 
+use Propel\Bundle\PropelBundle\Form\PropelTypeGuesser;
+use Propel\Bundle\PropelBundle\Form\Type\ModelType;
+use Propel\Bundle\PropelBundle\Form\Type\TranslationCollectionType;
+use Propel\Bundle\PropelBundle\Form\Type\TranslationType;
 use Symfony\Component\Form\AbstractExtension;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -23,11 +27,11 @@ class PropelExtension extends AbstractExtension
 {
     protected function loadTypes()
     {
-        return array(
-            new Type\ModelType(PropertyAccess::createPropertyAccessor()),
-            new Type\TranslationCollectionType(),
-            new Type\TranslationType(),
-        );
+        return [
+            new ModelType(PropertyAccess::createPropertyAccessor()),
+            new TranslationCollectionType(),
+            new TranslationType(),
+        ];
     }
 
     protected function loadTypeGuesser()

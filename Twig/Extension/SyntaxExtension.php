@@ -7,7 +7,12 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Twig\Extension;
+
+use function array_merge;
+use function implode;
+use function preg_replace;
 
 /**
  * SyntaxExtension class
@@ -20,9 +25,9 @@ class SyntaxExtension extends \Twig_Extension
 {
     public function getFilters()
     {
-        return array(
-            new \Twig_SimpleFilter('format_sql', array($this, 'formatSQL'), array('is_safe' => array('html'))),
-        );
+        return [
+            new \Twig_SimpleFilter('format_sql', [$this, 'formatSQL'], ['is_safe' => ['html']]),
+        ];
     }
 
     public function getName()
@@ -33,7 +38,7 @@ class SyntaxExtension extends \Twig_Extension
     public function formatSQL($sql)
     {
         // list of keywords to prepend a newline in output
-        $newlines = array(
+        $newlines = [
             'FROM',
             '(((FULL|LEFT|RIGHT)? ?(OUTER|INNER)?|CROSS|NATURAL)? JOIN)',
             'VALUES',
@@ -42,10 +47,10 @@ class SyntaxExtension extends \Twig_Extension
             'GROUP BY',
             'HAVING',
             'LIMIT',
-        );
+        ];
 
         // list of keywords to highlight
-        $keywords = array_merge($newlines, array(
+        $keywords = \array_merge($newlines, [
             // base
             'SELECT', 'UPDATE', 'DELETE', 'INSERT', 'REPLACE',
             'SET',
@@ -73,21 +78,21 @@ class SyntaxExtension extends \Twig_Extension
             'ASC',
             'DESC',
             'OFFSET',
-        ));
+        ]);
 
-        $sql = preg_replace(array(
-            '/\b('.implode('|', $newlines).')\b/',
-            '/\b('.implode('|', $keywords).')\b/',
+        $sql = \preg_replace([
+            '/\b(' . \implode('|', $newlines) . ')\b/',
+            '/\b(' . \implode('|', $keywords) . ')\b/',
             '/(\/\*.*\*\/)/',
             '/(`[^`.]*`)/',
             '/(([0-9a-zA-Z$_]+)\.([0-9a-zA-Z$_]+))/',
-        ), array(
+        ], [
             '<br />\\1',
             '<span class="SQLKeyword">\\1</span>',
             '<span class="SQLComment">\\1</span>',
             '<span class="SQLName">\\1</span>',
             '<span class="SQLName">\\1</span>',
-        ), $sql);
+        ], $sql);
 
         return $sql;
     }

@@ -7,6 +7,7 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Tests\Command;
 
 use Propel\Bundle\PropelBundle\Command\DatabaseCreateCommand;
@@ -20,12 +21,12 @@ class DatabaseCreateCommandTest extends TestCase
     /** @var TestableDatabaseCreateCommand */
     protected $command;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->command = new TestableDatabaseCreateCommand();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->command = null;
     }
@@ -37,37 +38,37 @@ class DatabaseCreateCommandTest extends TestCase
     {
         $datasource = $this->command->getTemporaryConfiguration($name, $config);
 
-        $this->assertArrayHasKey('datasources', $datasource);
-        $this->assertArrayHasKey($name, $datasource['datasources']);
-        $this->assertArrayHasKey('connection', $datasource['datasources'][$name]);
-        $this->assertArrayHasKey('dsn', $datasource['datasources'][$name]['connection']);
-        $this->assertEquals($expectedDsn, $datasource['datasources'][$name]['connection']['dsn']);
+        self::assertArrayHasKey('datasources', $datasource);
+        self::assertArrayHasKey($name, $datasource['datasources']);
+        self::assertArrayHasKey('connection', $datasource['datasources'][$name]);
+        self::assertArrayHasKey('dsn', $datasource['datasources'][$name]['connection']);
+        self::assertEquals($expectedDsn, $datasource['datasources'][$name]['connection']['dsn']);
     }
 
     public function dataTemporaryConfiguration()
     {
-        return array(
-            array(
+        return [
+            [
                 'dbname',
-                array('connection' => array('dsn' => 'mydsn:host=localhost;dbname=test_db;')),
+                ['connection' => ['dsn' => 'mydsn:host=localhost;dbname=test_db;']],
                 'mydsn:host=localhost;'
-            ),
-            array(
+            ],
+            [
                 'dbname_first',
-                array('connection' => array('dsn' => 'mydsn:dbname=test_db;host=localhost')),
+                ['connection' => ['dsn' => 'mydsn:dbname=test_db;host=localhost']],
                 'mydsn:host=localhost'
-            ),
-            array(
+            ],
+            [
                 'dbname_no_semicolon',
-                array('connection' => array('dsn' => 'mydsn:host=localhost;dbname=test_db')),
+                ['connection' => ['dsn' => 'mydsn:host=localhost;dbname=test_db']],
                 'mydsn:host=localhost;'
-            ),
-            array(
+            ],
+            [
                 'no_dbname',
-                array('connection' => array('dsn' => 'mydsn:host=localhost;')),
+                ['connection' => ['dsn' => 'mydsn:host=localhost;']],
                 'mydsn:host=localhost;'
-            ),
-        );
+            ],
+        ];
     }
 }
 

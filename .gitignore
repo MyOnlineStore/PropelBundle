@@ -4,3 +4,6 @@ vendor
 composer.lock
 composer.phar
 .idea
+.DS_Store
+.phpcs-cache
+.phpunit.result.cache

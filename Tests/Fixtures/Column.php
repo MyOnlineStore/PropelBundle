@@ -11,6 +11,8 @@
 
 namespace Propel\Bundle\PropelBundle\Tests\Fixtures;
 
+use function ucfirst;
+
 class Column extends \ColumnMap
 {
     private $name;
@@ -20,7 +22,7 @@ class Column extends \ColumnMap
     {
         $this->name = $name;
         $this->type = $type;
-        $this->phpName = ucfirst($name);
+        $this->phpName = \ucfirst($name);
     }
 
     public function isText()

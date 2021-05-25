@@ -14,11 +14,9 @@ use \TableMap;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class BookTableMap extends TableMap
 {
-
     /**
      * The (dot-path) name of this class
      */
@@ -29,6 +27,7 @@ class BookTableMap extends TableMap
      * Relations are not initialized by this method since they are lazy loaded
      *
      * @return void
+     *
      * @throws PropelException
      */
     public function initialize()

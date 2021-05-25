@@ -7,7 +7,10 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\DataFixtures\Loader;
+
+use Propel\Bundle\PropelBundle\DataFixtures\Loader\AbstractDataLoader;
 
 /**
  * @author Toni Uebernickel <tuebernickel@gmail.com>
@@ -20,9 +23,9 @@ class DataWiper extends AbstractDataLoader
      * @param array  $files          A set of files containing datas to load.
      * @param string $connectionName The Propel connection name
      */
-    public function load($files = array(), $connectionName)
+    public function load($files = [], $connectionName)
     {
-        $this->deletedClasses = array();
+        $this->deletedClasses = [];
         $this->loadMapBuilders($connectionName);
 
         $this->con = \Propel::getConnection($connectionName);
@@ -33,10 +36,10 @@ class DataWiper extends AbstractDataLoader
                 $this->con->exec('SET FOREIGN_KEY_CHECKS = 0;');
             }
 
-            $tables = array();
+            $tables = [];
             foreach ($this->dbMap->getTables() as $eachTable) {
                 /* @var $eachTable \TableMap */
-                $tables[$eachTable->getClassname()] = array();
+                $tables[$eachTable->getClassname()] = [];
             }
 
             $this->deleteCurrentData($tables);
@@ -44,11 +47,12 @@ class DataWiper extends AbstractDataLoader
             if ('mysql' === $this->con->getAttribute(\PDO::ATTR_DRIVER_NAME)) {
                 $this->con->exec('SET FOREIGN_KEY_CHECKS = 1;');
             }
+
             $this->con->commit();
-        } catch (\Exception $e) {
+        } catch (\Throwable $exception) {
             $this->con->rollBack();
 
-            throw $e;
+            throw $exception;
         }
     }
 
@@ -61,6 +65,6 @@ class DataWiper extends AbstractDataLoader
      */
     protected function transformDataToArray($file)
     {
-        return array();
+        return [];
     }
 }

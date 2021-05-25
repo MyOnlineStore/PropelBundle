@@ -38,7 +38,7 @@ class PropelChoiceLoader implements ChoiceLoaderInterface
      *
      * @var array
      */
-    protected $identifier = array();
+    protected $identifier = [];
 
     /**
      * Whether to use the identifier for index generation.
@@ -53,22 +53,21 @@ class PropelChoiceLoader implements ChoiceLoaderInterface
     protected $choiceList;
 
     /**
-     * PropelChoiceListLoader constructor.
-     *
-     * @param string            $class
-     * @param \ModelCriteria    $queryObject
-     * @param string            $useAsIdentifier
+     * @param string         $class
+     * @param \ModelCriteria $queryObject
+     * @param string         $useAsIdentifier
      */
     public function __construct($class, \ModelCriteria $queryObject, $useAsIdentifier = null)
     {
         $this->class = $class;
         $this->query = $queryObject;
         if ($useAsIdentifier) {
-            $this->identifier = array($this->query->getTableMap()->getColumn($useAsIdentifier));
+            $this->identifier = [$this->query->getTableMap()->getColumn($useAsIdentifier)];
         } else {
             $this->identifier = $this->query->getTableMap()->getPrimaryKeys();
         }
-        if (1 === count($this->identifier) && $this->isScalar(current($this->identifier))) {
+
+        if (1 === \count($this->identifier) && $this->isScalar(\current($this->identifier))) {
             $this->identifierAsIndex = true;
         }
     }
@@ -82,7 +81,7 @@ class PropelChoiceLoader implements ChoiceLoaderInterface
             return $this->choiceList;
         }
 
-        $models = iterator_to_array($this->query->find());
+        $models = \iterator_to_array($this->query->find());
 
         return $this->choiceList = new ArrayChoiceList($models, $value);
     }
@@ -94,22 +93,22 @@ class PropelChoiceLoader implements ChoiceLoaderInterface
     {
         // Performance optimization
         if (empty($values)) {
-            return array();
+            return [];
         }
 
         $optimize = null === $value;
 
         // Optimize performance in case we have a single-field identifier
-        if ($optimize && !$this->choiceList && $this->identifierAsIndex && current($this->identifier) instanceof \ColumnMap) {
-            $phpName = current($this->identifier)->getPhpName();
+        if ($optimize && !$this->choiceList && $this->identifierAsIndex && \current($this->identifier) instanceof \ColumnMap) {
+            $phpName = \current($this->identifier)->getPhpName();
             $query = clone $this->query;
             $unorderedObjects = $query->filterBy($phpName, $values, \Criteria::IN)->find();
-            $objectsById = array();
-            $objects = array();
+            $objectsById = [];
+            $objects = [];
 
             // Maintain order and indices from the given $values
             foreach ($unorderedObjects as $object) {
-                $objectsById[(string) current($this->getIdentifierValues($object))] = $object;
+                $objectsById[(string) \current($this->getIdentifierValues($object))] = $object;
             }
 
             foreach ($values as $i => $id) {
@@ -131,19 +130,19 @@ class PropelChoiceLoader implements ChoiceLoaderInterface
     {
         // Performance optimization
         if (empty($choices)) {
-            return array();
+            return [];
         }
 
         $optimize = null === $value;
 
         if ($optimize && !$this->choiceList && $this->identifierAsIndex) {
-            $values = array();
+            $values = [];
 
             // Maintain order and indices of the given objects
             foreach ($choices as $i => $object) {
                 if ($object instanceof $this->class) {
                     // Make sure to convert to the right format
-                    $values[$i] = (string) current($this->getIdentifierValues($object));
+                    $values[$i] = (string) \current($this->getIdentifierValues($object));
                 }
             }
 
@@ -162,13 +161,13 @@ class PropelChoiceLoader implements ChoiceLoaderInterface
      */
     private function isScalar(\ColumnMap $column)
     {
-        return in_array(
+        return \in_array(
             $column->getPdoType(),
-            array(
+            [
                 \PDO::PARAM_BOOL,
                 \PDO::PARAM_INT,
                 \PDO::PARAM_STR,
-            )
+            ]
         );
     }
 
@@ -186,21 +185,20 @@ class PropelChoiceLoader implements ChoiceLoaderInterface
     private function getIdentifierValues($model)
     {
         if (!$model instanceof $this->class) {
-            return array();
+            return [];
         }
 
-        if (1 === count($this->identifier) && current($this->identifier) instanceof \ColumnMap) {
-            $phpName = current($this->identifier)->getPhpName();
-            if (method_exists($model, 'get' . $phpName)) {
-                return array($model->{'get' . $phpName}());
+        if (1 === \count($this->identifier) && \current($this->identifier) instanceof \ColumnMap) {
+            $phpName = \current($this->identifier)->getPhpName();
+            if (\method_exists($model, 'get' . $phpName)) {
+                return [$model->{'get' . $phpName}()];
             }
         }
 
         if ($model instanceof \BaseObject) {
-            return array($model->getPrimaryKey());
+            return [$model->getPrimaryKey()];
         }
 
         return $model->getPrimaryKeys();
     }
-
 }

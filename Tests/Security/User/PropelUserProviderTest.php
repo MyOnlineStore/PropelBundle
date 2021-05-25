@@ -7,6 +7,7 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Tests\Security\User;
 
 use Propel\Bundle\PropelBundle\Security\User\PropelUserProvider;
@@ -18,7 +19,7 @@ use Propel\Bundle\PropelBundle\Tests\TestCase;
  */
 class PropelUserProviderTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         $this->loadPropelQuickBuilder();
 
@@ -38,7 +39,7 @@ SCHEMA;
 
         $builder = new \PropelQuickBuilder();
         $builder->setSchema($schema);
-        $builder->setClassTargets(array('tablemap', 'peer', 'object', 'query', 'peerstub', 'querystub'));
+        $builder->setClassTargets(['tablemap', 'peer', 'object', 'query', 'peerstub', 'querystub']);
         $builder->build();
     }
 
@@ -58,6 +59,6 @@ SCHEMA;
         $user1->setUsername('user2');
 
         $resultUser = $provider->refreshUser($user1);
-        $this->assertSame($user1, $resultUser);
+        self::assertSame($user1, $resultUser);
     }
 }

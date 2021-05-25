@@ -7,8 +7,10 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Command;
 
+use Propel\Bundle\PropelBundle\Command\AbstractCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -47,35 +49,37 @@ EOT
      *
      * @throws \InvalidArgumentException When the target directory does not exist
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        list($name, $defaultConfig) = $this->getConnection($input, $output);
+        [$name, $defaultConfig] = $this->getConnection($input, $output);
 
-        $ret = $this->callPhing('reverse', array(
+        $ret = $this->callPhing('reverse', [
             'propel.project'            => $name,
             'propel.database'           => $defaultConfig['adapter'],
             'propel.database.url'       => $defaultConfig['connection']['dsn'],
             'propel.database.user'      => $defaultConfig['connection']['user'],
-            'propel.database.password'  => isset($defaultConfig['connection']['password']) ? $defaultConfig['connection']['password'] : '',
-        ));
+            'propel.database.password'  => $defaultConfig['connection']['password'] ?? '',
+        ]);
 
         if (true === $ret) {
             $filesystem = new Filesystem();
-            $generated  = $this->getCacheDir().'/schema.xml';
+            $generated  = $this->getCacheDir() . '/schema.xml';
             $filename   = $name . '_reversed_schema.xml';
             $destFile   = $this->getApplication()->getKernel()->getProjectDir() . '/var/propel/generated-schemas/' . $filename;
 
-            if (file_exists($generated)) {
+            if (\file_exists($generated)) {
                 $filesystem->copy($generated, $destFile);
-                $output->writeln(array(
+                $output->writeln([
                     '',
-                    sprintf('>>  <info>File+</info>    %s', $destFile),
-                ));
+                    \sprintf('>>  <info>File+</info>    %s', $destFile),
+                ]);
             } else {
-                $output->writeln(array('', 'No generated files.'));
+                $output->writeln(['', 'No generated files.']);
             }
         } else {
             $this->writeTaskError($output, 'reverse');
         }
+
+        return 0;
     }
 }

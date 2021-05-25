@@ -7,9 +7,16 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Tests\DataFixtures;
 
 use Propel\Bundle\PropelBundle\Tests\TestCase as BaseTestCase;
+
+use function class_exists;
+use function file_put_contents;
+use function sys_get_temp_dir;
+use function tempnam;
+use function unlink;
 
 /**
  * @author Toni Uebernickel <tuebernickel@gmail.com>
@@ -26,9 +33,9 @@ class TestCase extends BaseTestCase
      *
      * @var array
      */
-    protected $tmpFiles = array();
+    protected $tmpFiles = [];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -57,20 +64,20 @@ XML;
 
         $builder = new \PropelQuickBuilder();
         $builder->setSchema($schema);
-        if (class_exists('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\Book')) {
-            $builder->setClassTargets(array());
+        if (\class_exists('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\Book')) {
+            $builder->setClassTargets([]);
         }
 
         $this->con = $builder->build();
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         foreach ($this->tmpFiles as $eachFile) {
-            @unlink($eachFile);
+            @\unlink($eachFile);
         }
 
-        $this->tmpFiles = array();
+        $this->tmpFiles = [];
     }
 
     /**
@@ -82,10 +89,10 @@ XML;
      */
     protected function getTempFile($content = '')
     {
-        $filename = tempnam(sys_get_temp_dir(), 'propelbundle-datafixtures-test');
-        @unlink($filename);
+        $filename = \tempnam(\sys_get_temp_dir(), 'propelbundle-datafixtures-test');
+        @\unlink($filename);
 
-        file_put_contents($filename, $content);
+        \file_put_contents($filename, $content);
 
         $this->tmpFiles[] = $filename;
 

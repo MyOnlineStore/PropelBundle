@@ -7,6 +7,7 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\DependencyInjection;
 
 /**
@@ -21,14 +22,12 @@ class Properties
      *
      * @var array
      */
-    private $properties;
+    private $properties = [];
 
     /**
-     * Default constructor.
-     *
      * @param $properties   An array of properties.
      */
-    public function __construct(array $properties = array())
+    public function __construct(array $properties = [])
     {
         $this->properties = $properties;
     }

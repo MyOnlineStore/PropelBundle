@@ -7,11 +7,18 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
+
+use function array_search;
+use function count;
+use function get_class;
+use function implode;
+use function sprintf;
 
 /**
  * Unique Object Validator checks if one or a set of fields contain unique values.
@@ -27,14 +34,14 @@ class UniqueObjectValidator extends ConstraintValidator
     public function validate($object, Constraint $constraint)
     {
         $fields      = (array) $constraint->fields;
-        $class       = get_class($object);
+        $class       = \get_class($object);
         $peerClass   = $class . 'Peer';
         $queryClass  = $class . 'Query';
         $classFields = $peerClass::getFieldNames(\BasePeer::TYPE_FIELDNAME);
 
         foreach ($fields as $fieldName) {
-            if (false === array_search($fieldName, $classFields)) {
-                throw new ConstraintDefinitionException('The field "' . $fieldName .'" doesn\'t exist in the "' . $class . '" class.');
+            if (false === \array_search($fieldName, $classFields)) {
+                throw new ConstraintDefinitionException('The field "' . $fieldName . '" doesn\'t exist in the "' . $class . '" class.');
             }
         }
 
@@ -47,13 +54,13 @@ class UniqueObjectValidator extends ConstraintValidator
         }
 
         $bddUsers  = $bddUsersQuery->find();
-        $countUser = count($bddUsers);
+        $countUser = \count($bddUsers);
 
-        if ($countUser > 1 || ($countUser === 1 && $object !== $bddUsers[0])) {
-            $fieldParts = array();
+        if ($countUser > 1 || (1 === $countUser && $object !== $bddUsers[0])) {
+            $fieldParts = [];
 
             foreach ($fields as $fieldName) {
-                $fieldParts[] = sprintf(
+                $fieldParts[] = \sprintf(
                     '%s "%s"',
                     $peerClass::translateFieldName($fieldName, \BasePeer::TYPE_FIELDNAME, \BasePeer::TYPE_PHPNAME),
                     $object->getByName($fieldName, \BasePeer::TYPE_FIELDNAME)
@@ -62,10 +69,10 @@ class UniqueObjectValidator extends ConstraintValidator
 
             $this->context->buildViolation($constraint->message)
                 ->atPath($constraint->errorPath)
-                ->setParameters(array(
+                ->setParameters([
                     '{{ object_class }}' => $class,
-                    '{{ fields }}' => implode($constraint->messageFieldSeparator, $fieldParts)
-                ))
+                    '{{ fields }}' => \implode($constraint->messageFieldSeparator, $fieldParts)
+                ])
                 ->addViolation();
         }
     }

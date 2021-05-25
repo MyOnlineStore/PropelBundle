@@ -1,61 +1,65 @@
 {
-  "name": "propel/propel-bundle",
-  "description": "Integration of Propel in Symfony2",
-  "keywords": [
-    "propel",
-    "orm",
-    "persistence"
-  ],
-  "type": "symfony-bundle",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "William Durand",
-      "email": "william.durand1@gmail.com"
-    }
-  ],
-  "autoload": {
-    "psr-4": {
-      "Propel\\Bundle\\PropelBundle\\": ""
-    },
-    "files": [
-      "autoload_aliases.php"
+    "name": "propel/propel-bundle",
+    "description": "Integration of Propel in Symfony2",
+    "keywords": [
+        "propel",
+        "orm",
+        "persistence"
     ],
-    "exclude-from-classmap": [
-      "Tests/"
-    ]
-  },
-  "require": {
-    "ext-pdo": "*",
-    "ext-simplexml": "*",
-    "propel/propel1": "^1.6.8",
-    "sensio/framework-extra-bundle": "^5.4",
-    "symfony/console": "^3.4|^4.4",
-    "symfony/form": "^3.4|^4.4",
-    "symfony/security": "^3.4|^4.4",
-    "symfony/security-bundle": "^3.4|^4.4",
-    "symfony/translation": "^3.4|^4.4"
-  },
-  "require-dev": {
-    "fzaninotto/faker": "^1.5",
-    "phing/phing": "^2.12",
-    "phpunit/phpunit": "^5.7",
-    "symfony/phpunit-bridge": "^5.1"
-  },
-  "conflict": {
-    "symfony/propel1-bridge": ">=2.8.0"
-  },
-  "replace": {
-    "symfony/propel1-bridge": "<=2.8.0"
-  },
-  "suggest": {
-    "propel/propel-acl-bundle": "For using the Propel ACL implementation"
-  },
-  "config": {
-    "vendor-dir": "vendor",
-    "sort-packages": true,
-    "platform": {
-      "php": "7.2.24"
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "William Durand",
+            "email": "william.durand1@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Propel\\Bundle\\PropelBundle\\": ""
+        },
+        "files": [
+            "autoload_aliases.php"
+        ],
+        "exclude-from-classmap": [
+            "Tests/"
+        ]
+    },
+    "require": {
+        "php": "^7.2",
+        "ext-pdo": "*",
+        "ext-simplexml": "*",
+        "propel/propel1": "^1.7.2",
+        "sensio/framework-extra-bundle": "^5.6",
+        "symfony/console": "^4.4",
+        "symfony/form": "^4.4",
+        "symfony/security": "^4.4",
+        "symfony/security-bundle": "^4.4",
+        "symfony/translation": "^4.4",
+        "symfony/yaml": "^4.4"
+    },
+    "require-dev": {
+        "fzaninotto/faker": "^1.9",
+        "myonlinestore/coding-standard": "^3.1",
+        "phing/phing": "^2.12",
+        "phpunit/phpunit": "^8.5",
+        "rector/rector": "^0.11.5",
+        "symfony/phpunit-bridge": "^5.2"
+    },
+    "conflict": {
+        "symfony/propel1-bridge": ">=2.8.0"
+    },
+    "replace": {
+        "symfony/propel1-bridge": "<=2.8.0"
+    },
+    "suggest": {
+        "propel/propel-acl-bundle": "For using the Propel ACL implementation"
+    },
+    "config": {
+        "vendor-dir": "vendor",
+        "sort-packages": true,
+        "platform": {
+            "php": "7.2.24"
+        }
     }
-  }
 }

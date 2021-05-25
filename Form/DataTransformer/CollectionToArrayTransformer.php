@@ -11,7 +11,6 @@
 
 namespace Propel\Bundle\PropelBundle\Form\DataTransformer;
 
-use PropelObjectCollection;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
 
@@ -26,10 +25,10 @@ class CollectionToArrayTransformer implements DataTransformerInterface
     public function transform($collection)
     {
         if (null === $collection) {
-            return array();
+            return [];
         }
 
-        if (!$collection instanceof PropelObjectCollection) {
+        if (!$collection instanceof \PropelObjectCollection) {
             throw new TransformationFailedException('Expected a \PropelObjectCollection.');
         }
 
@@ -38,13 +37,13 @@ class CollectionToArrayTransformer implements DataTransformerInterface
 
     public function reverseTransform($array)
     {
-        $collection = new PropelObjectCollection();
+        $collection = new \PropelObjectCollection();
 
         if ('' === $array || null === $array) {
             return $collection;
         }
 
-        if (!is_array($array)) {
+        if (!\is_array($array)) {
             throw new TransformationFailedException('Expected an array.');
         }
 

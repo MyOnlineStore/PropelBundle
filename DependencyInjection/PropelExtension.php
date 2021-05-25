@@ -7,8 +7,10 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\DependencyInjection;
 
+use Propel\Bundle\PropelBundle\DependencyInjection\Configuration;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -38,6 +40,7 @@ class PropelExtension extends Extension
         if (\file_exists($propelPath = $container->getParameter('kernel.project_dir') . '/vendor/propel/propel1')) {
             $container->setParameter('propel.path', $propelPath);
         }
+
         if (\file_exists($phingPath = $container->getParameter('kernel.project_dir') . '/vendor/phing/phing/classes')) {
             $container->setParameter('propel.phing_path', $phingPath);
         }
@@ -64,26 +67,26 @@ class PropelExtension extends Extension
 
         // Load services
         if (!$container->hasDefinition('propel')) {
-            $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+            $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
             $loader->load('propel.xml');
             $loader->load('converters.xml');
         }
 
         // build properties
-        if (isset($config['build_properties']) && is_array($config['build_properties'])) {
+        if (isset($config['build_properties']) && \is_array($config['build_properties'])) {
             $buildProperties = $config['build_properties'];
         } else {
-            $buildProperties = array();
+            $buildProperties = [];
         }
 
         // behaviors
-        if (isset($config['behaviors']) && is_array($config['behaviors'])) {
+        if (isset($config['behaviors']) && \is_array($config['behaviors'])) {
             foreach ($config['behaviors'] as $name => $class) {
-                $buildProperties[sprintf('propel.behavior.%s.class', $name)] = $class;
+                $buildProperties[\sprintf('propel.behavior.%s.class', $name)] = $class;
             }
         }
 
-        $container->getDefinition('propel.build_properties')->setArguments(array($buildProperties));
+        $container->getDefinition('propel.build_properties')->setArguments([$buildProperties]);
 
         if (!empty($config['dbal'])) {
             $this->dbalLoad($config['dbal'], $container);
@@ -99,25 +102,25 @@ class PropelExtension extends Extension
     protected function dbalLoad(array $config, ContainerBuilder $container)
     {
         if (empty($config['default_connection'])) {
-            $keys = array_keys($config['connections']);
-            $config['default_connection'] = reset($keys);
+            $keys = \array_keys($config['connections']);
+            $config['default_connection'] = \reset($keys);
         }
 
         $connectionName = $config['default_connection'];
         $container->setParameter('propel.dbal.default_connection', $connectionName);
 
-        if (0 === count($config['connections'])) {
-            $config['connections'] = array($connectionName => $config);
+        if (0 === (\is_array($config['connections']) || $config['connections'] instanceof \Countable ? \count($config['connections']) : 0)) {
+            $config['connections'] = [$connectionName => $config];
         }
 
-        $c = array();
+        $c = [];
         foreach ($config['connections'] as $name => $conf) {
             $c['datasources'][$name]['adapter'] = $conf['driver'];
             if (!empty($conf['slaves'])) {
                 $c['datasources'][$name]['slaves']['connection'] = $conf['slaves'];
             }
 
-            foreach (array('dsn', 'user', 'password', 'classname', 'options', 'attributes', 'settings', 'model_paths') as $att) {
+            foreach (['dsn', 'user', 'password', 'classname', 'options', 'attributes', 'settings', 'model_paths'] as $att) {
                 if (isset($conf[$att])) {
                     $c['datasources'][$name]['connection'][$att] = $conf[$att];
                 }
@@ -142,7 +145,7 @@ class PropelExtension extends Extension
             }
         }
 
-        $container->getDefinition('propel.configuration')->setArguments(array($c));
+        $container->getDefinition('propel.configuration')->setArguments([$c]);
     }
 
     public function getConfiguration(array $config, ContainerBuilder $container)
@@ -157,7 +160,7 @@ class PropelExtension extends Extension
      */
     public function getXsdValidationBasePath()
     {
-        return __DIR__.'/../Resources/config/schema';
+        return __DIR__ . '/../Resources/config/schema';
     }
 
     /**

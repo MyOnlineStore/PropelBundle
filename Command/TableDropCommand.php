@@ -7,8 +7,10 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Command;
 
+use Propel\Bundle\PropelBundle\Command\AbstractCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -51,16 +53,16 @@ EOT
      *
      * @throws \InvalidArgumentException When the target directory does not exist
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $tablesToDelete = $input->getArgument('table');
 
         if ($input->getOption('force')) {
-            $nbTable = count($tablesToDelete);
-            $tablePlural = (($nbTable > 1 || $nbTable == 0) ? 's' : '' );
+            $nbTable = null === $tablesToDelete ? 0 : \count($tablesToDelete);
+            $tablePlural = (($nbTable > 1 || 0 == $nbTable) ? 's' : '' );
 
             if ('prod' === $this->getApplication()->getKernel()->getEnvironment()) {
-                $count = (count($input->getArgument('table')) ?: 'all');
+                $count = (\count($input->getArgument('table')) ?: 'all');
 
                 $this->writeSection(
                     $output,
@@ -76,7 +78,7 @@ EOT
             }
 
             try {
-                list($name, $config) = $this->getConnection($input, $output);
+                [$name, $config] = $this->getConnection($input, $output);
                 $connection = \Propel::getConnection($name);
                 $adapter = \Propel::getDB($name);
 
@@ -87,8 +89,8 @@ EOT
 
                 if ($nbTable) {
                     foreach ($tablesToDelete as $tableToDelete) {
-                        if (!array_search($tableToDelete, $allTables)) {
-                            throw new \InvalidArgumentException(sprintf('Table %s doesn\'t exist in the database.', $tableToDelete));
+                        if (!\array_search($tableToDelete, $allTables)) {
+                            throw new \InvalidArgumentException(\sprintf("Table %s doesn't exist in the database.", $tableToDelete));
                         }
                     }
                 } else {
@@ -97,28 +99,30 @@ EOT
 
                 $connection->exec('SET FOREIGN_KEY_CHECKS = 0;');
 
-                array_walk($tablesToDelete, function(&$table, $key, $dbAdapter) { $table = $dbAdapter->quoteIdentifierTable($table); }, $adapter);
+                \array_walk($tablesToDelete, function(&$table, $key, $dbAdapter) { $table = $dbAdapter->quoteIdentifierTable($table); }, $adapter);
 
-                $tablesToDelete = join(', ', $tablesToDelete);
+                $tablesToDelete = \join(', ', $tablesToDelete);
 
                 if ('' !== $tablesToDelete) {
                     $connection->exec('DROP TABLE ' . $tablesToDelete . ' ;');
 
-                    $output->writeln(sprintf('Table' . $tablePlural . ' <info><comment>%s</comment> has been dropped.</info>', $tablesToDelete));
+                    $output->writeln(\sprintf(\Table::class . $tablePlural . ' <info><comment>%s</comment> has been dropped.</info>', $tablesToDelete));
                 } else {
                     $output->writeln('<info>No tables have been dropped</info>');
                 }
 
                 $connection->exec('SET FOREIGN_KEY_CHECKS = 1;');
-            } catch (\Exception $e) {
-                $this->writeSection($output, array(
+            } catch (\Throwable $exception) {
+                $this->writeSection($output, [
                     '[Propel] Exception caught',
                     '',
-                    $e->getMessage()
-                ), 'fg=white;bg=red');
+                    $exception->getMessage()
+                ], 'fg=white;bg=red');
             }
         } else {
             $output->writeln('<error>You have to use the "--force" option to drop some tables.</error>');
         }
+
+        return 0;
     }
 }

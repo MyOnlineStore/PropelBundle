@@ -28,12 +28,12 @@ class PropelTypeGuesserTest extends TestCase
 
     private $guesser;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->guesser = new PropelTypeGuesser();
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->guesser = null;
     }
@@ -42,65 +42,65 @@ class PropelTypeGuesserTest extends TestCase
     {
         $value = $this->guesser->guessMaxLength(self::CLASS_NAME, 'value');
 
-        $this->assertNotNull($value);
-        $this->assertEquals(255, $value->getValue());
+        self::assertNotNull($value);
+        self::assertEquals(255, $value->getValue());
     }
 
     public function testGuessMaxLengthWithFloat()
     {
         $value = $this->guesser->guessMaxLength(self::CLASS_NAME, 'price');
 
-        $this->assertNotNull($value);
-        $this->assertNull($value->getValue());
+        self::assertNotNull($value);
+        self::assertNull($value->getValue());
     }
 
     public function testGuessMinLengthWithText()
     {
         $value = $this->guesser->guessPattern(self::CLASS_NAME, 'value');
 
-        $this->assertNull($value);
+        self::assertNull($value);
     }
 
     public function testGuessMinLengthWithFloat()
     {
         $value = $this->guesser->guessPattern(self::CLASS_NAME, 'price');
 
-        $this->assertNotNull($value);
-        $this->assertNull($value->getValue());
+        self::assertNotNull($value);
+        self::assertNull($value->getValue());
     }
 
     public function testGuessRequired()
     {
         $value = $this->guesser->guessRequired(self::CLASS_NAME, 'id');
 
-        $this->assertNotNull($value);
-        $this->assertTrue($value->getValue());
+        self::assertNotNull($value);
+        self::assertTrue($value->getValue());
     }
 
     public function testGuessRequiredWithNullableColumn()
     {
         $value = $this->guesser->guessRequired(self::CLASS_NAME, 'value');
 
-        $this->assertNotNull($value);
-        $this->assertFalse($value->getValue());
+        self::assertNotNull($value);
+        self::assertFalse($value->getValue());
     }
 
     public function testGuessTypeWithoutTable()
     {
         $value = $this->guesser->guessType(self::UNKNOWN_CLASS_NAME, 'property');
 
-        $this->assertNotNull($value);
-        $this->assertEquals(TextType::class, $value->getType());
-        $this->assertEquals(Guess::LOW_CONFIDENCE, $value->getConfidence());
+        self::assertNotNull($value);
+        self::assertEquals(TextType::class, $value->getType());
+        self::assertEquals(Guess::LOW_CONFIDENCE, $value->getConfidence());
     }
 
     public function testGuessTypeWithoutColumn()
     {
         $value = $this->guesser->guessType(self::CLASS_NAME, 'property');
 
-        $this->assertNotNull($value);
-        $this->assertEquals(TextType::class, $value->getType());
-        $this->assertEquals(Guess::LOW_CONFIDENCE, $value->getConfidence());
+        self::assertNotNull($value);
+        self::assertEquals(TextType::class, $value->getType());
+        self::assertEquals(Guess::LOW_CONFIDENCE, $value->getConfidence());
     }
 
     /**
@@ -110,33 +110,29 @@ class PropelTypeGuesserTest extends TestCase
     {
         $value = $this->guesser->guessType(self::CLASS_NAME, $property);
 
-        $this->assertNotNull($value);
-        $this->assertEquals($type, $value->getType());
-        $this->assertEquals($confidence, $value->getConfidence());
+        self::assertNotNull($value);
+        self::assertEquals($type, $value->getType());
+        self::assertEquals($confidence, $value->getConfidence());
 
-        if ($type === ModelType::class) {
+        if (ModelType::class === $type) {
             $options = $value->getOptions();
 
-            $this->assertSame($multiple, $options['multiple']);
+            self::assertSame($multiple, $options['multiple']);
         }
     }
 
-    public static function dataProviderForGuessType()
+    public static function dataProviderForGuessType(): \Iterator
     {
-        return array(
-            array('is_active',  CheckboxType::class, Guess::HIGH_CONFIDENCE),
-            array('enabled',    CheckboxType::class, Guess::HIGH_CONFIDENCE),
-            array('id',         IntegerType::class,  Guess::MEDIUM_CONFIDENCE),
-            array('value',      TextType::class,     Guess::MEDIUM_CONFIDENCE),
-            array('price',      NumberType::class,   Guess::MEDIUM_CONFIDENCE),
-            array('updated_at', DateTimeType::class, Guess::HIGH_CONFIDENCE),
-
-            array('isActive',   CheckboxType::class, Guess::HIGH_CONFIDENCE),
-            array('updatedAt',  DateTimeType::class, Guess::HIGH_CONFIDENCE),
-
-            array('Authors',    ModelType::class,    Guess::HIGH_CONFIDENCE,     true),
-            array('Resellers',  ModelType::class,    Guess::HIGH_CONFIDENCE,     true),
-            array('MainAuthor', ModelType::class,    Guess::HIGH_CONFIDENCE,     false),
-        );
+        yield ['is_active',  CheckboxType::class, Guess::HIGH_CONFIDENCE];
+        yield ['enabled',    CheckboxType::class, Guess::HIGH_CONFIDENCE];
+        yield ['id',         IntegerType::class,  Guess::MEDIUM_CONFIDENCE];
+        yield ['value',      TextType::class,     Guess::MEDIUM_CONFIDENCE];
+        yield ['price',      NumberType::class,   Guess::MEDIUM_CONFIDENCE];
+        yield ['updated_at', DateTimeType::class, Guess::HIGH_CONFIDENCE];
+        yield ['isActive',   CheckboxType::class, Guess::HIGH_CONFIDENCE];
+        yield ['updatedAt',  DateTimeType::class, Guess::HIGH_CONFIDENCE];
+        yield ['Authors',    ModelType::class,    Guess::HIGH_CONFIDENCE,     true];
+        yield ['Resellers',  ModelType::class,    Guess::HIGH_CONFIDENCE,     true];
+        yield ['MainAuthor', ModelType::class,    Guess::HIGH_CONFIDENCE,     false];
     }
 }

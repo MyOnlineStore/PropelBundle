@@ -33,9 +33,9 @@ class TranslationCollectionFormListener implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return array(
-            FormEvents::PRE_SET_DATA => array('preSetData', 1),
-        );
+        return [
+            FormEvents::PRE_SET_DATA => ['preSetData', 1],
+        ];
     }
 
     public function preSetData(FormEvent $event)
@@ -47,25 +47,25 @@ class TranslationCollectionFormListener implements EventSubscriberInterface
             return;
         }
 
-        if (!is_array($data) && !($data instanceof \Traversable && $data instanceof \ArrayAccess)) {
+        if (!\is_array($data) && !($data instanceof \Traversable && $data instanceof \ArrayAccess)) {
             throw new UnexpectedTypeException($data, 'array or (\Traversable and \ArrayAccess)');
         }
 
         //get the class name of the i18nClass
-        $temp = explode('\\', $this->i18nClass);
-        $dataClass = end($temp);
+        $temp = \explode('\\', $this->i18nClass);
+        $dataClass = \end($temp);
 
         $rootData = $form->getRoot()->getData();
         $foundData = false;
 
-        $addFunction = 'add'.$dataClass;
+        $addFunction = 'add' . $dataClass;
 
         //add a database row for every needed language
         foreach ($this->languages as $lang) {
             $found = false;
 
             foreach ($data as $i18n) {
-                if (!method_exists($i18n, 'getLocale')) {
+                if (!\method_exists($i18n, 'getLocale')) {
                     throw new UnexpectedTypeException($i18n, 'Propel i18n object');
                 }
 
@@ -78,7 +78,7 @@ class TranslationCollectionFormListener implements EventSubscriberInterface
             if (!$found) {
                 $currentForm = $form;
                 while (!$foundData) {
-                    if (method_exists($rootData, $addFunction)) {
+                    if (\method_exists($rootData, $addFunction)) {
                         $foundData = true;
                         break;
                     } elseif ($currentForm->hasParent()) {
@@ -88,6 +88,7 @@ class TranslationCollectionFormListener implements EventSubscriberInterface
                         break;
                     }
                 }
+
                 if (!$foundData) {
                     throw new UnexpectedTypeException($rootData, 'Propel i18n object');
                 }

@@ -7,7 +7,10 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Command;
+
+use const PATH_SEPARATOR;
 
 /**
  * @author Fabien Potencier <fabien.potencier@symfony-project.com>
@@ -28,9 +31,9 @@ class Phing extends \Phing
         // that are not needed and incompatible (eg phing.tasks.ext.FtpDeployTask)
         // by placing current directory on the include path our defaults will be loaded
         // see ticket #5054
-        $includePath = get_include_path();
-        set_include_path(dirname(__FILE__).PATH_SEPARATOR.$includePath);
+        $includePath = \get_include_path();
+        \set_include_path(\dirname(__FILE__) . \PATH_SEPARATOR . $includePath);
         parent::runBuild();
-        set_include_path($includePath);
+        \set_include_path($includePath);
     }
 }

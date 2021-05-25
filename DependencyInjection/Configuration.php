@@ -7,11 +7,14 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+
+use function str_replace;
 
 /**
 * This class contains the configuration information for the bundle
@@ -28,7 +31,7 @@ class Configuration implements ConfigurationInterface
     /**
      * Constructor
      *
-     * @param Boolean $debug Wether to use the debug mode
+     * @param bool $debug Wether to use the debug mode
      */
     public function  __construct($debug)
     {
@@ -38,12 +41,12 @@ class Configuration implements ConfigurationInterface
     /**
      * Generates the configuration tree builder.
      *
-     * @return \Symfony\Component\Config\Definition\Builder\TreeBuilder The tree builder
+     * @return TreeBuilder The tree builder
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder('propel ');
-        $rootNode = \method_exists($treeBuilder, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('propel');
+        $treeBuilder = new TreeBuilder('propel');
+        $rootNode = \method_exists($treeBuilder, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->getRootNode('propel ');
 
         $this->addGeneralSection($rootNode);
         $this->addDbalSection($rootNode);
@@ -104,14 +107,18 @@ class Configuration implements ConfigurationInterface
             ->arrayNode('dbal')
                 ->beforeNormalization()
                     ->ifNull()
-                    ->then(function($v) { return array ('connections' => array('default' => array())); })
+                    ->then(function($v) {
+ return  ['connections' => ['default' => []]];
+                        })
                 ->end()
                 ->children()
                     ->scalarNode('default_connection')->defaultValue('default')->end()
                     ->scalarNode('driver')
                         ->beforeNormalization()
                             ->always()
-                            ->then(function($v) { return str_replace('pdo_', '', $v); })
+                            ->then(function($v) {
+ return \str_replace('pdo_', '', $v);
+                                })
                         ->end()
                         ->defaultValue('mysql')
                     ->end()
@@ -120,7 +127,9 @@ class Configuration implements ConfigurationInterface
                     ->scalarNode('dsn')
                         ->beforeNormalization()
                             ->always()
-                            ->then(function($v) { return str_replace('pdo_', '', $v); })
+                            ->then(function($v) {
+ return \str_replace('pdo_', '', $v);
+                                })
                         ->end()
                         ->defaultValue('')
                     ->end()
@@ -170,13 +179,13 @@ class Configuration implements ConfigurationInterface
      *         attributes:  {}
      *         settings:    {}
      *
-     * @return \Symfony\Component\Config\Definition\Builder\TreeBuilder The tree builder
+     * @return TreeBuilder The tree builder
      */
     private function getDbalConnectionsNode()
     {
         $treeBuilder = new TreeBuilder('connections');
         $node = \method_exists($treeBuilder, 'getRootNode') ?
-            $treeBuilder->getRootNode() : $treeBuilder->root('connections');
+            $treeBuilder->getRootNode() : $treeBuilder->getRootNode('connections');
 
         $node
             ->requiresAtLeastOneElement()
@@ -186,7 +195,9 @@ class Configuration implements ConfigurationInterface
                     ->scalarNode('driver')
                         ->beforeNormalization()
                             ->always()
-                            ->then(function($v) { return str_replace('pdo_', '', $v); })
+                            ->then(function($v) {
+ return \str_replace('pdo_', '', $v);
+ })
                         ->end()
                         ->defaultValue('mysql')
                     ->end()
@@ -195,7 +206,9 @@ class Configuration implements ConfigurationInterface
                     ->scalarNode('dsn')
                         ->beforeNormalization()
                             ->always()
-                            ->then(function($v) { return str_replace('pdo_', '', $v); })
+                            ->then(function($v) {
+ return \str_replace('pdo_', '', $v);
+ })
                         ->end()
                         ->defaultValue('')
                     ->end()
@@ -207,7 +220,9 @@ class Configuration implements ConfigurationInterface
                                 ->scalarNode('driver')
                                     ->beforeNormalization()
                                         ->always()
-                                        ->then(function($v) { return str_replace('pdo_', '', $v); })
+                                        ->then(function($v) {
+ return \str_replace('pdo_', '', $v);
+ })
                                     ->end()
                                     ->defaultValue('mysql')
                                 ->end()
@@ -216,7 +231,9 @@ class Configuration implements ConfigurationInterface
                                 ->scalarNode('dsn')
                                     ->beforeNormalization()
                                         ->always()
-                                        ->then(function($v) { return str_replace('pdo_', '', $v); })
+                                        ->then(function($v) {
+ return \str_replace('pdo_', '', $v);
+ })
                                     ->end()
                                     ->defaultValue('')
                                 ->end()
@@ -235,7 +252,7 @@ class Configuration implements ConfigurationInterface
                 ->fixXmlConfig('model_path')
                     ->children()
                         ->arrayNode('model_paths')
-                        ->defaultValue(array('src/', 'vendor/'))
+                        ->defaultValue(['src/', 'vendor/'])
                         ->prototype('scalar')->end()
                     ->end()
                 ->end()

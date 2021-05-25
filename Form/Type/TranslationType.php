@@ -36,7 +36,7 @@ class TranslationType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getName()
+    public function getBlockPrefix()
     {
         return 'propel1_translation';
     }
@@ -46,9 +46,9 @@ class TranslationType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setRequired(array(
+        $resolver->setRequired([
             'data_class',
             'columns',
-        ));
+        ]);
     }
 }

@@ -7,10 +7,27 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Tests\DataFixtures\Loader;
 
+use Faker\Factory;
 use Propel\Bundle\PropelBundle\DataFixtures\Loader\YamlDataLoader;
 use Propel\Bundle\PropelBundle\Tests\DataFixtures\TestCase;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthorPeer;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookPeer;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlBookWithObjectQuery;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlDelegateOnPrimaryKeyAuthorPeer;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlInheritedM2MRelationshipNobelizedAuthorPeer;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlInheritedRelationshipBookPeer;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyAuthorPeer;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyBookAuthorPeer;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyBookPeer;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesAuthorPeer;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesBookAuthorPeer;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesBookPeer;
+
+use function class_exists;
+use function strtolower;
 
 /**
  * @author William Durand <william.durand1@gmail.com>
@@ -34,14 +51,14 @@ Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\Book:
 YAML;
         $filename = $this->getTempFile($fixtures);
 
-        $loader = new YamlDataLoader(__DIR__.'/../../Fixtures/DataFixtures/Loader');
-        $loader->load(array($filename), 'default');
+        $loader = new YamlDataLoader(__DIR__ . '/../../Fixtures/DataFixtures/Loader');
+        $loader->load([$filename], 'default');
 
-        $books = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookPeer::doSelect(new \Criteria(), $this->con);
-        $this->assertCount(1, $books);
+        $books = BookPeer::doSelect(new \Criteria(), $this->con);
+        self::assertCount(1, $books);
 
         $book = $books[0];
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthor', $book->getBookAuthor());
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthor', $book->getBookAuthor());
     }
 
     public function testYamlLoadManyToMany()
@@ -102,27 +119,27 @@ YAML;
         $builder->setSchema($schema);
         $con = $builder->build();
 
-        $loader = new YamlDataLoader(__DIR__.'/../../Fixtures/DataFixtures/Loader');
-        $loader->load(array($filename), 'default');
+        $loader = new YamlDataLoader(__DIR__ . '/../../Fixtures/DataFixtures/Loader');
+        $loader->load([$filename], 'default');
 
-        $books = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyBookPeer::doSelect(new \Criteria(), $con);
-        $this->assertCount(2, $books);
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyBook', $books[0]);
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyBook', $books[1]);
+        $books = YamlManyToManyBookPeer::doSelect(new \Criteria(), $con);
+        self::assertCount(2, $books);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyBook', $books[0]);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyBook', $books[1]);
 
-        $authors = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyAuthorPeer::doSelect(new \Criteria(), $con);
-        $this->assertCount(2, $authors);
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyAuthor', $authors[0]);
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyAuthor', $authors[1]);
+        $authors = YamlManyToManyAuthorPeer::doSelect(new \Criteria(), $con);
+        self::assertCount(2, $authors);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyAuthor', $authors[0]);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyAuthor', $authors[1]);
 
-        $bookAuthors = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyBookAuthorPeer::doSelect(new \Criteria(), $con);
-        $this->assertCount(2, $bookAuthors);
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyBookAuthor', $bookAuthors[0]);
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyBookAuthor', $bookAuthors[1]);
+        $bookAuthors = YamlManyToManyBookAuthorPeer::doSelect(new \Criteria(), $con);
+        self::assertCount(2, $bookAuthors);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyBookAuthor', $bookAuthors[0]);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyBookAuthor', $bookAuthors[1]);
 
-        $this->assertEquals('Victor Hugo', $authors[1]->getName());
-        $this->assertTrue($authors[1]->getBooks()->contains($books[1]));
-        $this->assertEquals('Les misérables', $authors[1]->getBooks()->get(0)->getName());
+        self::assertEquals('Victor Hugo', $authors[1]->getName());
+        self::assertTrue($authors[1]->getBooks()->contains($books[1]));
+        self::assertEquals('Les misérables', $authors[1]->getBooks()->get(0)->getName());
     }
 
     public function testYamlLoadManyToManyMultipleFiles()
@@ -190,27 +207,27 @@ YAML;
         $builder->setSchema($schema);
         $con = $builder->build();
 
-        $loader = new YamlDataLoader(__DIR__.'/../../Fixtures/DataFixtures/Loader');
-        $loader->load(array($filename1, $filename2), 'default');
+        $loader = new YamlDataLoader(__DIR__ . '/../../Fixtures/DataFixtures/Loader');
+        $loader->load([$filename1, $filename2], 'default');
 
-        $books = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesBookPeer::doSelect(new \Criteria(), $con);
-        $this->assertCount(2, $books);
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesBook', $books[0]);
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesBook', $books[1]);
+        $books = YamlManyToManyMultipleFilesBookPeer::doSelect(new \Criteria(), $con);
+        self::assertCount(2, $books);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesBook', $books[0]);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesBook', $books[1]);
 
-        $authors = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesAuthorPeer::doSelect(new \Criteria(), $con);
-        $this->assertCount(2, $authors);
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesAuthor', $authors[0]);
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesAuthor', $authors[1]);
+        $authors = YamlManyToManyMultipleFilesAuthorPeer::doSelect(new \Criteria(), $con);
+        self::assertCount(2, $authors);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesAuthor', $authors[0]);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesAuthor', $authors[1]);
 
-        $bookAuthors = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesBookAuthorPeer::doSelect(new \Criteria(), $con);
-        $this->assertCount(2, $bookAuthors);
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesBookAuthor', $bookAuthors[0]);
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesBookAuthor', $bookAuthors[1]);
+        $bookAuthors = YamlManyToManyMultipleFilesBookAuthorPeer::doSelect(new \Criteria(), $con);
+        self::assertCount(2, $bookAuthors);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesBookAuthor', $bookAuthors[0]);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlManyToManyMultipleFilesBookAuthor', $bookAuthors[1]);
 
-        $this->assertEquals('Victor Hugo', $authors[1]->getName());
-        $this->assertTrue($authors[1]->getBooks()->contains($books[1]));
-        $this->assertEquals('Les misérables', $authors[1]->getBooks()->get(0)->getName());
+        self::assertEquals('Victor Hugo', $authors[1]->getName());
+        self::assertTrue($authors[1]->getBooks()->contains($books[1]));
+        self::assertEquals('Les misérables', $authors[1]->getBooks()->get(0)->getName());
     }
 
     public function testLoadSelfReferencing()
@@ -227,17 +244,17 @@ Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthor:
 YAML;
         $filename = $this->getTempFile($fixtures);
 
-        $loader = new YamlDataLoader(__DIR__.'/../../Fixtures/DataFixtures/Loader');
-        $loader->load(array($filename), 'default');
+        $loader = new YamlDataLoader(__DIR__ . '/../../Fixtures/DataFixtures/Loader');
+        $loader->load([$filename], 'default');
 
-        $books = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookPeer::doSelect(new \Criteria(), $this->con);
-        $this->assertCount(0, $books);
+        $books = BookPeer::doSelect(new \Criteria(), $this->con);
+        self::assertCount(0, $books);
 
-        $authors = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthorPeer::doSelect(new \Criteria(), $this->con);
-        $this->assertCount(1, $authors);
+        $authors = BookAuthorPeer::doSelect(new \Criteria(), $this->con);
+        self::assertCount(1, $authors);
 
         $author = $authors[0];
-        $this->assertEquals('A famous one', $author->getName());
+        self::assertEquals('A famous one', $author->getName());
     }
 
     public function testLoaderWithPhp()
@@ -251,17 +268,17 @@ Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthor:
 YAML;
         $filename = $this->getTempFile($fixtures);
 
-        $loader = new YamlDataLoader(__DIR__.'/../../Fixtures/DataFixtures/Loader');
-        $loader->load(array($filename), 'default');
+        $loader = new YamlDataLoader(__DIR__ . '/../../Fixtures/DataFixtures/Loader');
+        $loader->load([$filename], 'default');
 
-        $books = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookPeer::doSelect(new \Criteria(), $this->con);
-        $this->assertCount(0, $books);
+        $books = BookPeer::doSelect(new \Criteria(), $this->con);
+        self::assertCount(0, $books);
 
-        $authors = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthorPeer::doSelect(new \Criteria(), $this->con);
-        $this->assertCount(1, $authors);
+        $authors = BookAuthorPeer::doSelect(new \Criteria(), $this->con);
+        self::assertCount(1, $authors);
 
         $author = $authors[0];
-        $this->assertEquals('to be announced', $author->getName());
+        self::assertEquals('to be announced', $author->getName());
     }
 
     public function testLoadWithoutFaker()
@@ -275,22 +292,22 @@ Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthor:
 YAML;
         $filename = $this->getTempFile($fixtures);
 
-        $loader = new YamlDataLoader(__DIR__.'/../../Fixtures/DataFixtures/Loader');
-        $loader->load(array($filename), 'default');
+        $loader = new YamlDataLoader(__DIR__ . '/../../Fixtures/DataFixtures/Loader');
+        $loader->load([$filename], 'default');
 
-        $books = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookPeer::doSelect(new \Criteria(), $this->con);
-        $this->assertCount(0, $books);
+        $books = BookPeer::doSelect(new \Criteria(), $this->con);
+        self::assertCount(0, $books);
 
-        $authors = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthorPeer::doSelect(new \Criteria(), $this->con);
-        $this->assertCount(1, $authors);
+        $authors = BookAuthorPeer::doSelect(new \Criteria(), $this->con);
+        self::assertCount(1, $authors);
 
         $author = $authors[0];
-        $this->assertEquals('word', $author->getName());
+        self::assertEquals('word', $author->getName());
     }
 
     public function testLoadWithFaker()
     {
-        if (!class_exists('Faker\Factory')) {
+        if (!\class_exists('Faker\Factory')) {
             $this->markTestSkipped('Faker is mandatory');
         }
 
@@ -304,26 +321,26 @@ Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\Book:
 YAML;
         $filename  = $this->getTempFile($fixtures);
         $container = $this->getContainer();
-        $container->set('faker.generator', \Faker\Factory::create());
+        $container->set('faker.generator', Factory::create());
 
-        $loader = new YamlDataLoader(__DIR__.'/../../Fixtures/DataFixtures/Loader', $container);
-        $loader->load(array($filename), 'default');
+        $loader = new YamlDataLoader(__DIR__ . '/../../Fixtures/DataFixtures/Loader', $container);
+        $loader->load([$filename], 'default');
 
-        $books = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookPeer::doSelect(new \Criteria(), $this->con);
-        $this->assertCount(1, $books);
+        $books = BookPeer::doSelect(new \Criteria(), $this->con);
+        self::assertCount(1, $books);
 
         $book = $books[0];
-        $this->assertNotNull($book->getName());
-        $this->assertNotEquals('null', strtolower($book->getName()));
-        $this->assertRegexp('#[a-z]+#', $book->getName());
-        $this->assertNotNull($book->getDescription());
-        $this->assertNotEquals('null', strtolower($book->getDescription()));
-        $this->assertRegexp('#[\w ]+#', $book->getDescription());
+        self::assertNotNull($book->getName());
+        self::assertNotEquals('null', \strtolower($book->getName()));
+        self::assertRegexp('#[a-z]+#', $book->getName());
+        self::assertNotNull($book->getDescription());
+        self::assertNotEquals('null', \strtolower($book->getDescription()));
+        self::assertRegexp('#[\w ]+#', $book->getDescription());
     }
 
     public function testLoadWithFakerDateTime()
     {
-        if (!class_exists('Faker\Factory')) {
+        if (!\class_exists('Faker\Factory')) {
             $this->markTestSkipped('Faker is mandatory');
         }
 
@@ -337,19 +354,19 @@ Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\Book:
 YAML;
         $filename  = $this->getTempFile($fixtures);
         $container = $this->getContainer();
-        $container->set('faker.generator', \Faker\Factory::create());
+        $container->set('faker.generator', Factory::create());
 
-        $loader = new YamlDataLoader(__DIR__.'/../../Fixtures/DataFixtures/Loader', $container);
-        $loader->load(array($filename), 'default');
+        $loader = new YamlDataLoader(__DIR__ . '/../../Fixtures/DataFixtures/Loader', $container);
+        $loader->load([$filename], 'default');
 
-        $books = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookPeer::doSelect(new \Criteria(), $this->con);
-        $this->assertCount(1, $books);
+        $books = BookPeer::doSelect(new \Criteria(), $this->con);
+        self::assertCount(1, $books);
 
         $book = $books[0];
-        $this->assertRegExp('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $book->getName());
+        self::assertRegExp('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $book->getName());
 
         $datetime = new \DateTime($book->getName());
-        $this->assertInstanceOf('DateTime', $datetime);
+        self::assertInstanceOf('DateTime', $datetime);
     }
 
     public function testLoadWithInheritedRelationship()
@@ -398,15 +415,15 @@ YAML;
         $builder->setSchema($schema);
         $con = $builder->build();
 
-        $loader = new YamlDataLoader(__DIR__.'/../../Fixtures/DataFixtures/Loader');
-        $loader->load(array($filename), 'default');
+        $loader = new YamlDataLoader(__DIR__ . '/../../Fixtures/DataFixtures/Loader');
+        $loader->load([$filename], 'default');
 
-        $books = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlInheritedRelationshipBookPeer::doSelect(new \Criteria(), $con);
-        $this->assertCount(1, $books);
+        $books = YamlInheritedRelationshipBookPeer::doSelect(new \Criteria(), $con);
+        self::assertCount(1, $books);
 
         $book = $books[0];
         $author = $book->getAuthor();
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlInheritedRelationshipAuthor', $author);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlInheritedRelationshipAuthor', $author);
     }
 
     public function testLoadWithInheritedManyToManyRelationship()
@@ -473,15 +490,15 @@ YAML;
         $builder->setSchema($schema);
         $con = $builder->build();
 
-        $loader = new YamlDataLoader(__DIR__.'/../../Fixtures/DataFixtures/Loader');
-        $loader->load(array($filename), 'default');
+        $loader = new YamlDataLoader(__DIR__ . '/../../Fixtures/DataFixtures/Loader');
+        $loader->load([$filename], 'default');
 
-        $authors = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlInheritedM2MRelationshipNobelizedAuthorPeer::doSelect(new \Criteria(), $con);
-        $this->assertCount(1, $authors);
+        $authors = YamlInheritedM2MRelationshipNobelizedAuthorPeer::doSelect(new \Criteria(), $con);
+        self::assertCount(1, $authors);
 
         $author = $authors[0];
         $books = $author->getBooks();
-        $this->assertCount(2, $books);
+        self::assertCount(2, $books);
     }
 
     public function testLoadArrayToObjectType()
@@ -508,13 +525,13 @@ YAML;
         $builder->setSchema($schema);
         $con = $builder->build();
 
-        $loader = new YamlDataLoader(__DIR__.'/../../Fixtures/DataFixtures/Loader');
-        $loader->load(array($filename), 'default');
+        $loader = new YamlDataLoader(__DIR__ . '/../../Fixtures/DataFixtures/Loader');
+        $loader->load([$filename], 'default');
 
-        $book = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlBookWithObjectQuery::create(null, $con)->findOne();
+        $book = YamlBookWithObjectQuery::create(null, $con)->findOne();
 
-        $this->assertInstanceOf('\Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlBookWithObject', $book);
-        $this->assertEquals(array('opt1' => 2012, 'opt2' => 140, 'inner' => array('subOpt' => 123)), $book->getOptions());
+        self::assertInstanceOf('\Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlBookWithObject', $book);
+        self::assertEquals(['opt1' => 2012, 'opt2' => 140, 'inner' => ['subOpt' => 123]], $book->getOptions());
     }
 
     public function testLoadDelegatedOnPrimaryKey()
@@ -558,14 +575,14 @@ YAML;
         $builder->setSchema($schema);
         $con = $builder->build();
 
-        $loader = new YamlDataLoader(__DIR__.'/../../Fixtures/DataFixtures/Loader');
-        $loader->load(array($filename), 'default');
+        $loader = new YamlDataLoader(__DIR__ . '/../../Fixtures/DataFixtures/Loader');
+        $loader->load([$filename], 'default');
 
-        $authors = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlDelegateOnPrimaryKeyAuthorPeer::doSelect(new \Criteria(), $con);
-        $this->assertCount(1, $authors);
+        $authors = YamlDelegateOnPrimaryKeyAuthorPeer::doSelect(new \Criteria(), $con);
+        self::assertCount(1, $authors);
 
         $author = $authors[0];
         $person = $author->getYamlDelegateOnPrimaryKeyPerson();
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlDelegateOnPrimaryKeyPerson', $person);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\YamlDelegateOnPrimaryKeyPerson', $person);
     }
 }

@@ -7,9 +7,13 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Tests\DataFixtures\Loader;
 
 use Propel\Bundle\PropelBundle\Tests\DataFixtures\TestCase;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\Book;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthor;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookPeer;
 
 /**
  * @author Toni Uebernickel <tuebernickel@gmail.com>
@@ -18,22 +22,22 @@ class DataWiperTest extends TestCase
 {
     public function testWipesExistingData()
     {
-        $author = new \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthor();
+        $author = new BookAuthor();
         $author->setName('Some famous author');
 
-        $book = new \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\Book();
+        $book = new Book();
         $book
             ->setName('Armageddon is near')
             ->setBookAuthor($author)
             ->save($this->con)
         ;
 
-        $savedBook = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookPeer::doSelectOne(new \Criteria(), $this->con);
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\Book', $savedBook, 'The fixture has been saved correctly.');
+        $savedBook = BookPeer::doSelectOne(new \Criteria(), $this->con);
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\Book', $savedBook, 'The fixture has been saved correctly.');
 
         $builder = $this->getMockBuilder('Propel\Bundle\PropelBundle\DataFixtures\Loader\DataWiper');
         $wipeout = $builder
-            ->setMethods(array('loadMapBuilders'))
+            ->setMethods(['loadMapBuilders'])
             ->disableOriginalConstructor()
             ->getMock()
         ;
@@ -50,8 +54,8 @@ class DataWiperTest extends TestCase
             ->method('loadMapBuilders')
         ;
 
-        $wipeout->load(array(), 'default');
+        $wipeout->load([], 'default');
 
-        $this->assertCount(0, \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookPeer::doSelect(new \Criteria(), $this->con));
+        self::assertCount(0, BookPeer::doSelect(new \Criteria(), $this->con));
     }
 }

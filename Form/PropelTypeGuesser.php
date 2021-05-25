@@ -33,7 +33,7 @@ use Symfony\Component\Form\Guess\ValueGuess;
  */
 class PropelTypeGuesser implements FormTypeGuesserInterface
 {
-    private $cache = array();
+    private $cache = [];
 
     /**
      * {@inheritdoc}
@@ -41,79 +41,87 @@ class PropelTypeGuesser implements FormTypeGuesserInterface
     public function guessType($class, $property)
     {
         if (!$table = $this->getTable($class)) {
-            return new TypeGuess(TextType::class, array(), Guess::LOW_CONFIDENCE);
+            return new TypeGuess(TextType::class, [], Guess::LOW_CONFIDENCE);
         }
 
         foreach ($table->getRelations() as $relation) {
-            if ($relation->getType() === \RelationMap::MANY_TO_ONE) {
-                if (strtolower($property) === strtolower($relation->getName())) {
-                    return new TypeGuess(ModelType::class, array(
+            if (\RelationMap::MANY_TO_ONE === $relation->getType()) {
+                if (\strtolower($property) === \strtolower($relation->getName())) {
+                    return new TypeGuess(ModelType::class, [
                         'class' => $relation->getForeignTable()->getClassName(),
                         'multiple' => false,
-                    ), Guess::HIGH_CONFIDENCE);
+                    ], Guess::HIGH_CONFIDENCE);
                 }
-            } elseif ($relation->getType() === \RelationMap::ONE_TO_MANY) {
-                if (strtolower($property) === strtolower($relation->getPluralName())) {
-                    return new TypeGuess(ModelType::class, array(
+            } elseif (\RelationMap::ONE_TO_MANY === $relation->getType()) {
+                if (\strtolower($property) === \strtolower($relation->getPluralName())) {
+                    return new TypeGuess(ModelType::class, [
                         'class' => $relation->getForeignTable()->getClassName(),
                         'multiple' => true,
-                    ), Guess::HIGH_CONFIDENCE);
+                    ], Guess::HIGH_CONFIDENCE);
                 }
-            } elseif ($relation->getType() === \RelationMap::MANY_TO_MANY) {
-                if (strtolower($property) == strtolower($relation->getPluralName())) {
-                    return new TypeGuess(ModelType::class, array(
+            } elseif (\RelationMap::MANY_TO_MANY === $relation->getType()) {
+                if (\strtolower($property) == \strtolower($relation->getPluralName())) {
+                    return new TypeGuess(ModelType::class, [
                         'class' => $relation->getLocalTable()->getClassName(),
                         'multiple' => true,
-                    ), Guess::HIGH_CONFIDENCE);
+                    ], Guess::HIGH_CONFIDENCE);
                 }
             }
         }
 
         if (!$column = $this->getColumn($class, $property)) {
-            return new TypeGuess(TextType::class, array(), Guess::LOW_CONFIDENCE);
+            return new TypeGuess(TextType::class, [], Guess::LOW_CONFIDENCE);
         }
 
         switch ($column->getType()) {
             case \PropelColumnTypes::BOOLEAN:
             case \PropelColumnTypes::BOOLEAN_EMU:
-                return new TypeGuess(CheckboxType::class, array(), Guess::HIGH_CONFIDENCE);
+                return new TypeGuess(CheckboxType::class, [], Guess::HIGH_CONFIDENCE);
+
             case \PropelColumnTypes::TIMESTAMP:
             case \PropelColumnTypes::BU_TIMESTAMP:
-                return new TypeGuess(DateTimeType::class, array(), Guess::HIGH_CONFIDENCE);
+                return new TypeGuess(DateTimeType::class, [], Guess::HIGH_CONFIDENCE);
+
             case \PropelColumnTypes::DATE:
             case \PropelColumnTypes::BU_DATE:
-                return new TypeGuess(DateType::class, array(), Guess::HIGH_CONFIDENCE);
+                return new TypeGuess(DateType::class, [], Guess::HIGH_CONFIDENCE);
+
             case \PropelColumnTypes::TIME:
-                return new TypeGuess(TimeType::class, array(), Guess::HIGH_CONFIDENCE);
+                return new TypeGuess(TimeType::class, [], Guess::HIGH_CONFIDENCE);
+
             case \PropelColumnTypes::FLOAT:
             case \PropelColumnTypes::REAL:
             case \PropelColumnTypes::DOUBLE:
             case \PropelColumnTypes::DECIMAL:
-                return new TypeGuess(NumberType::class, array(), Guess::MEDIUM_CONFIDENCE);
+                return new TypeGuess(NumberType::class, [], Guess::MEDIUM_CONFIDENCE);
+
             case \PropelColumnTypes::TINYINT:
             case \PropelColumnTypes::SMALLINT:
             case \PropelColumnTypes::INTEGER:
             case \PropelColumnTypes::BIGINT:
             case \PropelColumnTypes::NUMERIC:
-                return new TypeGuess(IntegerType::class, array(), Guess::MEDIUM_CONFIDENCE);
+                return new TypeGuess(IntegerType::class, [], Guess::MEDIUM_CONFIDENCE);
+
             case \PropelColumnTypes::ENUM:
             case \PropelColumnTypes::CHAR:
                 if ($column->getValueSet()) {
                     //check if this is mysql enum
                     $choices = $column->getValueSet();
-                    $labels = array_map('ucfirst', $choices);
+                    $labels = \array_map('ucfirst', $choices);
 
-                    return new TypeGuess(ChoiceType::class, array('choices' => array_combine($choices, $labels)), Guess::MEDIUM_CONFIDENCE);
+                    return new TypeGuess(ChoiceType::class, ['choices' => \array_combine($choices, $labels)], Guess::MEDIUM_CONFIDENCE);
                 }
             case \PropelColumnTypes::VARCHAR:
-                return new TypeGuess(TextType::class, array(), Guess::MEDIUM_CONFIDENCE);
+                return new TypeGuess(TextType::class, [], Guess::MEDIUM_CONFIDENCE);
+
             case \PropelColumnTypes::LONGVARCHAR:
             case \PropelColumnTypes::BLOB:
             case \PropelColumnTypes::CLOB:
             case \PropelColumnTypes::CLOB_EMU:
-                return new TypeGuess(TextareaType::class, array(), Guess::MEDIUM_CONFIDENCE);
+                return new TypeGuess(TextareaType::class, [], Guess::MEDIUM_CONFIDENCE);
+
             default:
-                return new TypeGuess(TextType::class, array(), Guess::LOW_CONFIDENCE);
+                return new TypeGuess(TextType::class, [], Guess::LOW_CONFIDENCE);
         }
     }
 
@@ -136,6 +144,7 @@ class PropelTypeGuesser implements FormTypeGuesserInterface
             if ($column->isText()) {
                 return new ValueGuess($column->getSize(), Guess::HIGH_CONFIDENCE);
             }
+
             switch ($column->getType()) {
                 case \PropelColumnTypes::FLOAT:
                 case \PropelColumnTypes::REAL:
@@ -168,7 +177,7 @@ class PropelTypeGuesser implements FormTypeGuesserInterface
             return $this->cache[$class];
         }
 
-        if (class_exists($queryClass = $class.'Query')) {
+        if (\class_exists($queryClass = $class . 'Query')) {
             $query = new $queryClass();
 
             return $this->cache[$class] = $query->getTableMap();
@@ -177,18 +186,18 @@ class PropelTypeGuesser implements FormTypeGuesserInterface
 
     protected function getColumn($class, $property)
     {
-        if (isset($this->cache[$class.'::'.$property])) {
-            return $this->cache[$class.'::'.$property];
+        if (isset($this->cache[$class . '::' . $property])) {
+            return $this->cache[$class . '::' . $property];
         }
 
         $table = $this->getTable($class);
 
         if ($table && $table->hasColumn($property)) {
-            return $this->cache[$class.'::'.$property] = $table->getColumn($property);
+            return $this->cache[$class . '::' . $property] = $table->getColumn($property);
         }
 
         if ($table && $table->hasColumnByInsensitiveCase($property)) {
-            return $this->cache[$class.'::'.$property] = $table->getColumnByInsensitiveCase($property);
+            return $this->cache[$class . '::' . $property] = $table->getColumnByInsensitiveCase($property);
         }
     }
 }

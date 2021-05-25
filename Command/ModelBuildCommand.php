@@ -7,8 +7,10 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Command;
 
+use Propel\Bundle\PropelBundle\Command\AbstractCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -46,11 +48,11 @@ EOT
      *
      * @throws \InvalidArgumentException When the target directory does not exist
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (true === $this->callPhing('om')) {
             foreach ($this->tempSchemas as $schemaFile => $schemaDetails) {
-                $output->writeln(sprintf(
+                $output->writeln(\sprintf(
                     '>>  <info>%20s</info>    Generated model classes from <comment>%s</comment>',
                     $schemaDetails['bundle'],
                     $schemaDetails['basename']
@@ -59,5 +61,7 @@ EOT
         } else {
             $this->writeTaskError($output, 'om');
         }
+
+        return 0;
     }
 }

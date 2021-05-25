@@ -12,6 +12,7 @@
 namespace Propel\Bundle\PropelBundle\Form\Type;
 
 use Propel\Bundle\PropelBundle\Form\EventListener\TranslationCollectionFormListener;
+use Propel\Bundle\PropelBundle\Form\Type\TranslationType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -33,6 +34,7 @@ class TranslationCollectionType extends AbstractType
         if (!isset($options['entry_options']['data_class']) || null === $options['entry_options']['data_class']) {
             throw new MissingOptionsException('data_class must be set');
         }
+
         if (!isset($options['entry_options']['columns']) || null === $options['entry_options']['columns']) {
             throw new MissingOptionsException('columns must be set');
         }
@@ -56,12 +58,12 @@ class TranslationCollectionType extends AbstractType
     {
         parent::configureOptions($resolver);
 
-        $resolver->setRequired(array(
+        $resolver->setRequired([
             'languages',
-        ));
+        ]);
 
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             'entry_type' => TranslationType::class,
-        ));
+        ]);
     }
 }

@@ -7,10 +7,15 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Tests\DataFixtures\Dumper;
 
 use Propel\Bundle\PropelBundle\DataFixtures\Dumper\YamlDataDumper;
 use Propel\Bundle\PropelBundle\Tests\DataFixtures\TestCase;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\Book;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthor;
+
+use function file_get_contents;
 
 /**
  * @author William Durand <william.durand1@gmail.com>
@@ -20,13 +25,13 @@ class YamlDataDumperTest extends TestCase
 {
     public function testYamlDump()
     {
-        $author = new \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthor();
+        $author = new BookAuthor();
         $author->setName('A famous one')->save($this->con);
 
         $complementary = new \stdClass();
         $complementary->first_word_date = '2012-01-01';
 
-        $book = new \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\Book();
+        $book = new Book();
         $book
             ->setName('An important one')
             ->setAuthorId(1)
@@ -36,7 +41,7 @@ class YamlDataDumperTest extends TestCase
 
         $filename = $this->getTempFile();
 
-        $loader = new YamlDataDumper(__DIR__.'/../../Fixtures/DataFixtures/Loader');
+        $loader = new YamlDataDumper(__DIR__ . '/../../Fixtures/DataFixtures/Loader');
         $loader->dump($filename);
 
         $expected = <<<YAML
@@ -53,7 +58,7 @@ Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\Book:
 
 YAML;
 
-        $result = file_get_contents($filename);
-        $this->assertEquals($expected, $result);
+        $result = \file_get_contents($filename);
+        self::assertEquals($expected, $result);
     }
 }

@@ -2,22 +2,29 @@
 
 namespace Propel\Bundle\PropelBundle\Tests\Fixtures\Model\om;
 
-use \BasePeer;
-use \Criteria;
-use \PDO;
-use \PDOStatement;
-use \Propel;
-use \PropelException;
-use \PropelPDO;
+use BasePeer;
+use Criteria;
+use PDO;
+use PDOStatement;
+use Propel;
 use Propel\Bundle\PropelBundle\Tests\Fixtures\Model\Book;
 use Propel\Bundle\PropelBundle\Tests\Fixtures\Model\BookPeer;
 use Propel\Bundle\PropelBundle\Tests\Fixtures\Model\map\BookTableMap;
+use PropelException;
+use PropelPDO;
+
+use function array_key_exists;
+use function get_class;
+use function in_array;
+use function is_array;
+use function is_object;
+use function is_scalar;
+use function print_r;
+use function str_replace;
+use function var_export;
 
 /**
  * Base static class for performing query and update operations on the 'book' table.
- *
- *
- *
  */
 abstract class BaseBookPeer
 {
@@ -61,9 +68,10 @@ abstract class BaseBookPeer
      * An identity map to hold any loaded instances of Book objects.
      * This must be public so that other peer classes can access this when hydrating from JOIN
      * queries.
+     *
      * @var array Book[]
      */
-    public static $instances = array();
+    public static $instances = [];
 
     /**
      * holds an array of fieldnames
@@ -71,14 +79,14 @@ abstract class BaseBookPeer
      * first dimension keys are the type constants
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
-    protected static $fieldNames = array (
-        BasePeer::TYPE_PHPNAME => array ('Id', 'Name', 'Slug', ),
-        BasePeer::TYPE_STUDLYPHPNAME => array ('id', 'name', 'slug', ),
-        BasePeer::TYPE_COLNAME => array (self::ID, self::NAME, self::SLUG, ),
-        BasePeer::TYPE_RAW_COLNAME => array ('ID', 'NAME', 'SLUG', ),
-        BasePeer::TYPE_FIELDNAME => array ('id', 'name', 'slug', ),
-        BasePeer::TYPE_NUM => array (0, 1, 2, )
-    );
+    protected static $fieldNames =  [
+        BasePeer::TYPE_PHPNAME =>  ['Id', 'Name', 'Slug', ],
+        BasePeer::TYPE_STUDLYPHPNAME =>  ['id', 'name', 'slug', ],
+        BasePeer::TYPE_COLNAME =>  [self::ID, self::NAME, self::SLUG, ],
+        BasePeer::TYPE_RAW_COLNAME =>  ['ID', 'NAME', 'SLUG', ],
+        BasePeer::TYPE_FIELDNAME =>  ['id', 'name', 'slug', ],
+        BasePeer::TYPE_NUM =>  [0, 1, 2, ]
+    ];
 
     /**
      * holds an array of keys for quick access to the fieldnames array
@@ -86,14 +94,14 @@ abstract class BaseBookPeer
      * first dimension keys are the type constants
      * e.g. self::$fieldNames[BasePeer::TYPE_PHPNAME]['Id'] = 0
      */
-    protected static $fieldKeys = array (
-        BasePeer::TYPE_PHPNAME => array ('Id' => 0, 'Name' => 1, 'Slug' => 2, ),
-        BasePeer::TYPE_STUDLYPHPNAME => array ('id' => 0, 'name' => 1, 'slug' => 2, ),
-        BasePeer::TYPE_COLNAME => array (self::ID => 0, self::NAME => 1, self::SLUG => 2, ),
-        BasePeer::TYPE_RAW_COLNAME => array ('ID' => 0, 'NAME' => 1, 'SLUG' => 2, ),
-        BasePeer::TYPE_FIELDNAME => array ('id' => 0, 'name' => 1, 'slug' => 2, ),
-        BasePeer::TYPE_NUM => array (0, 1, 2, )
-    );
+    protected static $fieldKeys =  [
+        BasePeer::TYPE_PHPNAME =>  ['Id' => 0, 'Name' => 1, 'Slug' => 2, ],
+        BasePeer::TYPE_STUDLYPHPNAME =>  ['id' => 0, 'name' => 1, 'slug' => 2, ],
+        BasePeer::TYPE_COLNAME =>  [self::ID => 0, self::NAME => 1, self::SLUG => 2, ],
+        BasePeer::TYPE_RAW_COLNAME =>  ['ID' => 0, 'NAME' => 1, 'SLUG' => 2, ],
+        BasePeer::TYPE_FIELDNAME =>  ['id' => 0, 'name' => 1, 'slug' => 2, ],
+        BasePeer::TYPE_NUM =>  [0, 1, 2, ]
+    ];
 
     /**
      * Translates a fieldname to another type
@@ -101,16 +109,18 @@ abstract class BaseBookPeer
      * @param string $name     field name
      * @param string $fromType One of the class type constants BasePeer::TYPE_PHPNAME, BasePeer::TYPE_STUDLYPHPNAME
      *                         BasePeer::TYPE_COLNAME, BasePeer::TYPE_FIELDNAME, BasePeer::TYPE_NUM
-     * @param  string          $toType One of the class type constants
+     * @param  string $toType   One of the class type constants
+     *
      * @return string          translated name of the field.
+     *
      * @throws PropelException - if the specified name could not be found in the fieldname mappings.
      */
     public static function translateFieldName($name, $fromType, $toType)
     {
         $toNames = self::getFieldNames($toType);
-        $key = isset(self::$fieldKeys[$fromType][$name]) ? self::$fieldKeys[$fromType][$name] : null;
-        if ($key === null) {
-            throw new PropelException("'$name' could not be found in the field names of type '$fromType'. These are: " . print_r(self::$fieldKeys[$fromType], true));
+        $key = self::$fieldKeys[$fromType][$name] ?? null;
+        if (null === $key) {
+            throw new PropelException("'$name' could not be found in the field names of type '$fromType'. These are: " . \print_r(self::$fieldKeys[$fromType], true));
         }
 
         return $toNames[$key];
@@ -122,12 +132,13 @@ abstract class BaseBookPeer
      * @param string $type The type of fieldnames to return:
      *                      One of the class type constants BasePeer::TYPE_PHPNAME, BasePeer::TYPE_STUDLYPHPNAME
      *                      BasePeer::TYPE_COLNAME, BasePeer::TYPE_FIELDNAME, BasePeer::TYPE_NUM
+     *
      * @return array A list of field names
      */
 
     public static function getFieldNames($type = BasePeer::TYPE_PHPNAME)
     {
-        if (!array_key_exists($type, self::$fieldNames)) {
+        if (!\array_key_exists($type, self::$fieldNames)) {
             throw new PropelException('Method getFieldNames() expects the parameter $type to be one of the class constants BasePeer::TYPE_PHPNAME, BasePeer::TYPE_STUDLYPHPNAME, BasePeer::TYPE_COLNAME, BasePeer::TYPE_FIELDNAME, BasePeer::TYPE_NUM. ' . $type . ' was given.');
         }
 
@@ -142,13 +153,15 @@ abstract class BaseBookPeer
      *    $c->addAlias("alias1", TablePeer::TABLE_NAME);
      *    $c->addJoin(TablePeer::alias("alias1", TablePeer::PRIMARY_KEY_COLUMN), TablePeer::PRIMARY_KEY_COLUMN);
      * </code>
+     *
      * @param  string $alias  The alias for the current table.
      * @param  string $column The column name for current table. (i.e. BookPeer::COLUMN_NAME).
+     *
      * @return string
      */
     public static function alias($alias, $column)
     {
-        return str_replace(BookPeer::TABLE_NAME.'.', $alias.'.', $column);
+        return \str_replace(BookPeer::TABLE_NAME . '.', $alias . '.', $column);
     }
 
     /**
@@ -158,8 +171,9 @@ abstract class BaseBookPeer
      * XML schema will not be added to the select list and only loaded
      * on demand.
      *
-     * @param  Criteria        $criteria object containing the columns to add.
-     * @param  string          $alias    optional table alias
+     * @param  Criteria $criteria object containing the columns to add.
+     * @param  string   $alias    optional table alias
+     *
      * @throws PropelException Any exceptions caught during processing will be
      *         rethrown wrapped into a PropelException.
      */
@@ -180,8 +194,9 @@ abstract class BaseBookPeer
      * Returns the number of rows matching criteria.
      *
      * @param  Criteria  $criteria
-     * @param  boolean   $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
+     * @param bool      $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
      * @param  PropelPDO $con
+     *
      * @return int       Number of matching rows.
      */
     public static function doCount(Criteria $criteria, $distinct = false, PropelPDO $con = null)
@@ -194,7 +209,7 @@ abstract class BaseBookPeer
         // tables go into the FROM clause.
         $criteria->setPrimaryTableName(BookPeer::TABLE_NAME);
 
-        if ($distinct && !in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
+        if ($distinct && !\in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
             $criteria->setDistinct();
         }
 
@@ -205,9 +220,10 @@ abstract class BaseBookPeer
         $criteria->clearOrderByColumns(); // ORDER BY won't ever affect the count
         $criteria->setDbName(self::DATABASE_NAME); // Set the correct dbName
 
-        if ($con === null) {
+        if (null === $con) {
             $con = Propel::getConnection(BookPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
+
         // BasePeer returns a PDOStatement
         $stmt = BasePeer::doCount($criteria, $con);
 
@@ -216,6 +232,7 @@ abstract class BaseBookPeer
         } else {
             $count = 0; // no rows returned; we infer that means 0 matches.
         }
+
         $stmt->closeCursor();
 
         return $count;
@@ -223,9 +240,11 @@ abstract class BaseBookPeer
     /**
      * Selects one object from the DB.
      *
-     * @param  Criteria        $criteria object used to create the SELECT statement.
-     * @param  PropelPDO       $con
+     * @param  Criteria  $criteria object used to create the SELECT statement.
+     * @param  PropelPDO $con
+     *
      * @return Book
+     *
      * @throws PropelException Any exceptions caught during processing will be
      *         rethrown wrapped into a PropelException.
      */
@@ -243,9 +262,11 @@ abstract class BaseBookPeer
     /**
      * Selects several row from the DB.
      *
-     * @param  Criteria        $criteria The Criteria object used to build the SELECT statement.
-     * @param  PropelPDO       $con
+     * @param  Criteria  $criteria The Criteria object used to build the SELECT statement.
+     * @param  PropelPDO $con
+     *
      * @return array           Array of selected Objects
+     *
      * @throws PropelException Any exceptions caught during processing will be
      *         rethrown wrapped into a PropelException.
      */
@@ -259,16 +280,19 @@ abstract class BaseBookPeer
      * Use this method directly if you want to work with an executed statement durirectly (for example
      * to perform your own object hydration).
      *
-     * @param  Criteria        $criteria The Criteria object used to build the SELECT statement.
-     * @param  PropelPDO       $con      The connection to use
+     * @see        BasePeer::doSelect()
+     *
+     * @param  Criteria  $criteria The Criteria object used to build the SELECT statement.
+     * @param  PropelPDO $con      The connection to use
+     *
+     * @return PDOStatement The executed PDOStatement object.
+     *
      * @throws PropelException Any exceptions caught during processing will be
      *         rethrown wrapped into a PropelException.
-     * @return PDOStatement The executed PDOStatement object.
-     * @see        BasePeer::doSelect()
      */
     public static function doSelectStmt(Criteria $criteria, PropelPDO $con = null)
     {
-        if ($con === null) {
+        if (null === $con) {
             $con = Propel::getConnection(BookPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
@@ -298,9 +322,10 @@ abstract class BaseBookPeer
     public static function addInstanceToPool($obj, $key = null)
     {
         if (Propel::isInstancePoolingEnabled()) {
-            if ($key === null) {
+            if (null === $key) {
                 $key = (string) $obj->getId();
             } // if key === null
+
             self::$instances[$key] = $obj;
         }
     }
@@ -317,14 +342,15 @@ abstract class BaseBookPeer
      */
     public static function removeInstanceFromPool($value)
     {
-        if (Propel::isInstancePoolingEnabled() && $value !== null) {
-            if (is_object($value) && $value instanceof Book) {
+        if (Propel::isInstancePoolingEnabled() && null !== $value) {
+            if (\is_object($value) && $value instanceof Book) {
                 $key = (string) $value->getId();
-            } elseif (is_scalar($value)) {
+            } elseif (\is_scalar($value)) {
                 // assume we've been passed a primary key
                 $key = (string) $value;
             } else {
-                $e = new PropelException("Invalid value passed to removeInstanceFromPool().  Expected primary key or Book object; got " . (is_object($value) ? get_class($value) . ' object.' : var_export($value,true)));
+                $e = new PropelException('Invalid value passed to removeInstanceFromPool().  Expected primary key or Book object; got ' . (\is_object($value) ? \get_class($value) . ' object.' : \var_export($value,true)));
+
                 throw $e;
             }
 
@@ -338,9 +364,11 @@ abstract class BaseBookPeer
      * For tables with a single-column primary key, that simple pkey value will be returned.  For tables with
      * a multi-column primary key, a serialize()d version of the primary key will be returned.
      *
-     * @param  string $key The key (@see getPrimaryKeyHash()) for this instance.
-     * @return Book   Found object or NULL if 1) no instance exists for specified key or 2) instance pooling has been disabled.
      * @see        getPrimaryKeyHash()
+     *
+     * @param  string $key The key (@see getPrimaryKeyHash()) for this instance.
+     *
+     * @return Book   Found object or NULL if 1) no instance exists for specified key or 2) instance pooling has been disabled.
      */
     public static function getInstanceFromPool($key)
     {
@@ -360,7 +388,7 @@ abstract class BaseBookPeer
      */
     public static function clearInstancePool()
     {
-        self::$instances = array();
+        self::$instances = [];
     }
 
     /**
@@ -377,14 +405,15 @@ abstract class BaseBookPeer
      * For tables with a single-column primary key, that simple pkey value will be returned.  For tables with
      * a multi-column primary key, a serialize()d version of the primary key will be returned.
      *
-     * @param  array  $row      PropelPDO resultset row.
-     * @param  int    $startcol The 0-based offset for reading from the resultset row.
+     * @param  array $row      PropelPDO resultset row.
+     * @param  int   $startcol The 0-based offset for reading from the resultset row.
+     *
      * @return string A string version of PK or NULL if the components of primary key in result array are all null.
      */
     public static function getPrimaryKeyHashFromRow($row, $startcol = 0)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[$startcol] === null) {
+        if (null === $row[$startcol]) {
             return null;
         }
 
@@ -398,6 +427,7 @@ abstract class BaseBookPeer
      *
      * @param  array $row      PropelPDO resultset row.
      * @param  int   $startcol The 0-based offset for reading from the resultset row.
+     *
      * @return mixed The primary key of the row
      */
     public static function getPrimaryKeyFromRow($row, $startcol = 0)
@@ -414,7 +444,7 @@ abstract class BaseBookPeer
      */
     public static function populateObjects(PDOStatement $stmt)
     {
-        $results = array();
+        $results = [];
 
         // set the class once to avoid overhead in the loop
         $cls = BookPeer::getOMClass(false);
@@ -433,6 +463,7 @@ abstract class BaseBookPeer
                 BookPeer::addInstanceToPool($obj, $key);
             } // if key exists
         }
+
         $stmt->closeCursor();
 
         return $results;
@@ -440,11 +471,13 @@ abstract class BaseBookPeer
     /**
      * Populates an object of the default type or an object that inherit from the default.
      *
-     * @param  array           $row      PropelPDO resultset row.
-     * @param  int             $startcol The 0-based offset for reading from the resultset row.
+     * @param  array $row      PropelPDO resultset row.
+     * @param  int   $startcol The 0-based offset for reading from the resultset row.
+     *
+     * @return array (Book object, last column rank)
+     *
      * @throws PropelException Any exceptions caught during processing will be
      *         rethrown wrapped into a PropelException.
-     * @return array (Book object, last column rank)
      */
     public static function populateObject($row, $startcol = 0)
     {
@@ -461,13 +494,15 @@ abstract class BaseBookPeer
             BookPeer::addInstanceToPool($obj, $key);
         }
 
-        return array($obj, $col);
+        return [$obj, $col];
     }
 
     /**
      * Returns the TableMap related to this peer.
      * This method is not needed for general use but a specific application could have a need.
+     *
      * @return TableMap
+     *
      * @throws PropelException Any exceptions caught during processing will be
      *         rethrown wrapped into a PropelException.
      */
@@ -483,7 +518,7 @@ abstract class BaseBookPeer
     {
       $dbMap = Propel::getDatabaseMap(BaseBookPeer::DATABASE_NAME);
       if (!$dbMap->hasTable(BaseBookPeer::TABLE_NAME)) {
-        $dbMap->addTableObject(new BookTableMap());
+            $dbMap->addTableObject(new BookTableMap());
       }
     }
 
@@ -495,7 +530,8 @@ abstract class BaseBookPeer
      * relative to a location on the PHP include_path.
      * (e.g. path.to.MyClass -> 'path/to/MyClass.php')
      *
-     * @param  boolean $withPrefix Whether or not to return the path with the class name
+     * @param bool $withPrefix Whether or not to return the path with the class name
+     *
      * @return string  path.to.ClassName
      */
     public static function getOMClass($withPrefix = true)
@@ -506,15 +542,17 @@ abstract class BaseBookPeer
     /**
      * Performs an INSERT on the database, given a Book or Criteria object.
      *
-     * @param  mixed           $values Criteria or Book object containing data that is used to create the INSERT statement.
-     * @param  PropelPDO       $con    the PropelPDO connection to use
+     * @param  mixed     $values Criteria or Book object containing data that is used to create the INSERT statement.
+     * @param  PropelPDO $con    the PropelPDO connection to use
+     *
      * @return mixed           The new primary key.
+     *
      * @throws PropelException Any exceptions caught during processing will be
      *         rethrown wrapped into a PropelException.
      */
     public static function doInsert($values, PropelPDO $con = null)
     {
-        if ($con === null) {
+        if (null === $con) {
             $con = Propel::getConnection(BookPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
 
@@ -524,8 +562,8 @@ abstract class BaseBookPeer
             $criteria = $values->buildCriteria(); // build Criteria from Book object
         }
 
-        if ($criteria->containsKey(BookPeer::ID) && $criteria->keyContainsValue(BookPeer::ID) ) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key ('.BookPeer::ID.')');
+        if ($criteria->containsKey(BookPeer::ID) && $criteria->keyContainsValue(BookPeer::ID)) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key (' . BookPeer::ID . ')');
         }
 
         // Set the correct dbName
@@ -539,6 +577,7 @@ abstract class BaseBookPeer
             $con->commit();
         } catch (PropelException $e) {
             $con->rollBack();
+
             throw $e;
         }
 
@@ -548,15 +587,17 @@ abstract class BaseBookPeer
     /**
      * Performs an UPDATE on the database, given a Book or Criteria object.
      *
-     * @param  mixed           $values Criteria or Book object containing data that is used to create the UPDATE statement.
-     * @param  PropelPDO       $con    The connection to use (specify PropelPDO connection object to exert more control over transactions).
+     * @param  mixed     $values Criteria or Book object containing data that is used to create the UPDATE statement.
+     * @param  PropelPDO $con    The connection to use (specify PropelPDO connection object to exert more control over transactions).
+     *
      * @return int             The number of affected rows (if supported by underlying database driver).
+     *
      * @throws PropelException Any exceptions caught during processing will be
      *         rethrown wrapped into a PropelException.
      */
     public static function doUpdate($values, PropelPDO $con = null)
     {
-        if ($con === null) {
+        if (null === $con) {
             $con = Propel::getConnection(BookPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
 
@@ -572,7 +613,6 @@ abstract class BaseBookPeer
             } else {
                 $selectCriteria->setPrimaryTableName(BookPeer::TABLE_NAME);
             }
-
         } else { // $values is Book object
             $criteria = $values->buildCriteria(); // gets full criteria
             $selectCriteria = $values->buildPkeyCriteria(); // gets criteria w/ primary key(s)
@@ -588,13 +628,15 @@ abstract class BaseBookPeer
      * Deletes all rows from the book table.
      *
      * @param  PropelPDO $con the connection to use
+     *
      * @return int       The number of affected rows (if supported by underlying database driver).
      */
     public static function doDeleteAll(PropelPDO $con = null)
     {
-        if ($con === null) {
+        if (null === $con) {
             $con = Propel::getConnection(BookPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
+
         $affectedRows = 0; // initialize var to track total num of affected rows
         try {
             // use transaction because $criteria could contain info
@@ -611,6 +653,7 @@ abstract class BaseBookPeer
             return $affectedRows;
         } catch (PropelException $e) {
             $con->rollBack();
+
             throw $e;
         }
     }
@@ -618,17 +661,19 @@ abstract class BaseBookPeer
     /**
      * Performs a DELETE on the database, given a Book or Criteria object OR a primary key value.
      *
-     * @param mixed $values Criteria or Book object or primary key or array of primary keys
-     *              which is used to create the DELETE statement
-     * @param  PropelPDO $con the connection to use
+     * @param mixed     $values Criteria or Book object or primary key or array of primary keys
+     *                  which is used to create the DELETE statement
+     * @param  PropelPDO $con    the connection to use
+     *
      * @return int       The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
      *             if supported by native driver or if emulated using Propel.
+     *
      * @throws PropelException Any exceptions caught during processing will be
      *         rethrown wrapped into a PropelException.
      */
      public static function doDelete($values, PropelPDO $con = null)
      {
-        if ($con === null) {
+        if (null === $con) {
             $con = Propel::getConnection(BookPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
 
@@ -670,6 +715,7 @@ abstract class BaseBookPeer
             return $affectedRows;
         } catch (PropelException $e) {
             $con->rollBack();
+
             throw $e;
         }
     }
@@ -688,14 +734,14 @@ abstract class BaseBookPeer
      */
     public static function doValidate($obj, $cols = null)
     {
-        $columns = array();
+        $columns = [];
 
         if ($cols) {
             $dbMap = Propel::getDatabaseMap(BookPeer::DATABASE_NAME);
             $tableMap = $dbMap->getTable(BookPeer::TABLE_NAME);
 
-            if (! is_array($cols)) {
-                $cols = array($cols);
+            if (! \is_array($cols)) {
+                $cols = [$cols];
             }
 
             foreach ($cols as $colName) {
@@ -716,6 +762,7 @@ abstract class BaseBookPeer
      *
      * @param  int       $pk  the primary key.
      * @param  PropelPDO $con the connection to use
+     *
      * @return Book
      */
     public static function retrieveByPK($pk, PropelPDO $con = null)
@@ -725,7 +772,7 @@ abstract class BaseBookPeer
             return $obj;
         }
 
-        if ($con === null) {
+        if (null === $con) {
             $con = Propel::getConnection(BookPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
@@ -740,20 +787,21 @@ abstract class BaseBookPeer
     /**
      * Retrieve multiple objects by pkey.
      *
-     * @param  array           $pks List of primary keys
-     * @param  PropelPDO       $con the connection to use
+     * @param  array     $pks List of primary keys
+     * @param  PropelPDO $con the connection to use
+     *
      * @throws PropelException Any exceptions caught during processing will be
      *         rethrown wrapped into a PropelException.
      */
     public static function retrieveByPKs($pks, PropelPDO $con = null)
     {
-        if ($con === null) {
+        if (null === $con) {
             $con = Propel::getConnection(BookPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
         $objs = null;
         if (empty($pks)) {
-            $objs = array();
+            $objs = [];
         } else {
             $criteria = new Criteria(BookPeer::DATABASE_NAME);
             $criteria->add(BookPeer::ID, $pks, Criteria::IN);
@@ -762,7 +810,6 @@ abstract class BaseBookPeer
 
         return $objs;
     }
-
 } // BaseBookPeer
 
 // This is the static code needed to register the TableMap for this table with the main Propel class.

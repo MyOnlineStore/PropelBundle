@@ -7,6 +7,7 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Controller;
 
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -45,9 +46,9 @@ class PanelController implements ContainerAwareInterface
     /**
      * Renders the profiler panel for the given token.
      *
-     * @param string  $token      The profiler token
-     * @param string  $connection The connection name
-     * @param integer $query
+     * @param string $token      The profiler token
+     * @param string $connection The connection name
+     * @param int    $query
      *
      * @return Response A Response instance
      */
@@ -72,7 +73,7 @@ class PanelController implements ContainerAwareInterface
         try {
             $stmt = $db->doExplainPlan($con, $queries[$query]['sql']);
             $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\Exception $e) {
+        } catch (\Throwable $exception) {
             return new Response('<div class="error">This query cannot be explained.</div>');
         }
 

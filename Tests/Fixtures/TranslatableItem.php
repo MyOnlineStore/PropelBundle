@@ -11,6 +11,8 @@
 
 namespace Propel\Bundle\PropelBundle\Tests\Fixtures;
 
+use function in_array;
+
 class TranslatableItem implements \Persistent
 {
     private $id;
@@ -18,7 +20,7 @@ class TranslatableItem implements \Persistent
     private $groupName;
     private $price;
 
-    public function __construct($id = null, $translations = array())
+    public function __construct($id = null, $translations = [])
     {
         $this->id = $id;
         $this->currentTranslations = $translations;
@@ -107,7 +109,7 @@ class TranslatableItem implements \Persistent
 
     public function addTranslatableItemI18n(TranslatableItemI18n $i)
     {
-        if (!in_array($i, $this->currentTranslations)) {
+        if (!\in_array($i, $this->currentTranslations)) {
             $this->currentTranslations[$i->getLocale()] = $i;
             $i->setItem($this);
         }

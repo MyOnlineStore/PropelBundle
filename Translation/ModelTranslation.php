@@ -6,7 +6,7 @@ use Symfony\Component\Config\Resource\ResourceInterface;
 use Symfony\Component\Translation\Dumper\DumperInterface;
 use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\MessageCatalogue;
-use Symfony\Component\Translation\Translator;
+use Symfony\Component\Translation\TranslatorBagInterface;
 
 /**
  * A translation loader retrieving data from a Propel model.
@@ -28,8 +28,8 @@ class ModelTranslation implements DumperInterface, LoaderInterface, ResourceInte
     /**
      * @var array
      */
-    protected $options = array(
-        'columns' => array(
+    protected $options = [
+        'columns' => [
             // The key and its translation ..
             'key' => 'key',
             'translation' => 'translation',
@@ -39,8 +39,8 @@ class ModelTranslation implements DumperInterface, LoaderInterface, ResourceInte
             'domain' => 'domain',
             // The datetime of the last update.
             'updated_at' => 'updated_at',
-        ),
-    );
+        ],
+    ];
 
     /**
      * @var \PDOStatement
@@ -48,23 +48,21 @@ class ModelTranslation implements DumperInterface, LoaderInterface, ResourceInte
     private $resourcesStatement;
 
     /**
-     * Constructor.
-     *
-     * @todo Enabled re-use of the provided query when deserializing the resource.
-     *
      * @param string              $className
      * @param array               $options
      * @param \ModelCriteria|null $query     A Query to use. If null is provided a new one will be retrieved.
      *                                       Note: This query will not be re-used when checking the freshness of the resource.
      *
      * @throws \PropelException If the class is invalid and no query class could be found.
+     *
+     * @todo Enabled re-use of the provided query when deserializing the resource.
      */
-    public function __construct($className, array $options = array(), \ModelCriteria $query = null)
+    public function __construct($className, array $options = [], \ModelCriteria $query = null)
     {
         $this->className = $className;
-        $this->options = array_replace_recursive($this->options, $options);
+        $this->options = \array_replace_recursive($this->options, $options);
 
-        if (!$query) {
+        if (null === $query) {
             $query = \PropelQuery::from($this->className);
         }
 
@@ -74,7 +72,7 @@ class ModelTranslation implements DumperInterface, LoaderInterface, ResourceInte
     /**
      * {@inheritdoc}
      */
-    public function registerResources(Translator $translator)
+    public function registerResources(TranslatorBagInterface $translator)
     {
         $stmt = $this->getResourcesStatement();
 
@@ -124,7 +122,7 @@ class ModelTranslation implements DumperInterface, LoaderInterface, ResourceInte
     /**
      * {@inheritdoc}
      */
-    public function dump(MessageCatalogue $messages, $options = array())
+    public function dump(MessageCatalogue $messages, $options = [])
     {
         $connection = \Propel::getConnection($this->query->getDbName());
         $connection->beginTransaction();
@@ -152,7 +150,7 @@ class ModelTranslation implements DumperInterface, LoaderInterface, ResourceInte
         if (!$connection->commit()) {
             $connection->rollBack();
 
-            throw new \RuntimeException(sprintf('An error occurred while committing the transaction. [%s: %s]', $connection->errorCode(), $connection->errorInfo()));
+            throw new \RuntimeException(\sprintf('An error occurred while committing the transaction. [%s: %s]', $connection->errorCode(), $connection->errorInfo()));
         }
     }
 
@@ -162,7 +160,7 @@ class ModelTranslation implements DumperInterface, LoaderInterface, ResourceInte
     public function isFresh($timestamp)
     {
         $query = clone $this->query;
-        $query->filterBy($this->getColumnPhpname('updated_at'), new \DateTime('@'.$timestamp), \ModelCriteria::GREATER_THAN);
+        $query->filterBy($this->getColumnPhpname('updated_at'), new \DateTime('@' . $timestamp), \ModelCriteria::GREATER_THAN);
 
         return !$query->exists();
     }
@@ -172,7 +170,7 @@ class ModelTranslation implements DumperInterface, LoaderInterface, ResourceInte
      */
     public function __toString()
     {
-        return sprintf('PropelModelTranslation::%s', $this->className);
+        return \sprintf('PropelModelTranslation::%s', $this->className);
     }
 
     /**
@@ -194,13 +192,13 @@ class ModelTranslation implements DumperInterface, LoaderInterface, ResourceInte
             return $this->resourcesStatement;
         }
 
-        $sql = vsprintf('SELECT DISTINCT `%s` AS `locale`, `%s` AS `domain` FROM `%s`', array(
+        $sql = \vsprintf('SELECT DISTINCT `%s` AS `locale`, `%s` AS `domain` FROM `%s`', [
             // SELECT ..
             $this->query->getTableMap()->getColumn($this->getColumnname('locale'))->getName(),
             $this->query->getTableMap()->getColumn($this->getColumnname('domain'))->getName(),
             // FROM ..
             $this->query->getTableMap()->getName(),
-        ));
+        ]);
 
         $connection = \Propel::getConnection($this->query->getDbName(), \Propel::CONNECTION_READ);
 
@@ -243,10 +241,10 @@ class ModelTranslation implements DumperInterface, LoaderInterface, ResourceInte
      */
     public function serialize()
     {
-        return serialize(array(
+        return \serialize([
             $this->className,
             $this->options,
-        ));
+        ]);
     }
 
     /**
@@ -254,10 +252,7 @@ class ModelTranslation implements DumperInterface, LoaderInterface, ResourceInte
      */
     public function unserialize($serialized)
     {
-        list(
-            $this->className,
-            $this->options
-        ) = unserialize($serialized);
+        [$this->className, $this->options] = \unserialize($serialized);
 
         $this->query = \PropelQuery::from($this->className);
     }

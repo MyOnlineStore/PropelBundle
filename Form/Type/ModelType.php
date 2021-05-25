@@ -16,11 +16,10 @@ use Propel\Bundle\PropelBundle\Form\DataTransformer\CollectionToArrayTransformer
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\Options;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
+use Symfony\Component\OptionsResolver\Options;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * ModelType class.
@@ -57,12 +56,12 @@ class ModelType extends AbstractType
      *
      * For backwards compatibility, objects are cast to strings by default.
      *
+     * @internal This method is public to be usable as callback. It should not
+     *           be used in user code.
+     *
      * @param object $choice The object.
      *
      * @return string The string representation of the object.
-     *
-     * @internal This method is public to be usable as callback. It should not
-     *           be used in user code.
      */
     public static function createChoiceLabel($choice)
     {
@@ -76,19 +75,19 @@ class ModelType extends AbstractType
      * a single-column integer ID. In that case, the value of the field is
      * the ID of the object. That ID is also used as field name.
      *
+     * @internal This method is public to be usable as callback. It should not
+     *           be used in user code.
+     *
      * @param object     $choice The object.
      * @param int|string $key    The choice key.
      * @param string     $value  The choice value. Corresponds to the object's
      *                           ID here.
      *
      * @return string The field name.
-     *
-     * @internal This method is public to be usable as callback. It should not
-     *           be used in user code.
      */
     public static function createChoiceName($choice, $key, $value)
     {
-        return str_replace('-', '_', (string) $value);
+        return \str_replace('-', '_', (string) $value);
     }
 
     /**
@@ -126,15 +125,17 @@ class ModelType extends AbstractType
             /** @var \ModelCriteria $query */
             $query = $options['query'];
             if ($options['index_property']) {
-                $identifier = array($query->getTableMap()->getColumn($options['index_property']));
+                $identifier = [$query->getTableMap()->getColumn($options['index_property'])];
             } else {
                 $identifier = $query->getTableMap()->getPrimaryKeys();
             }
+
             /** @var \ColumnMap $firstIdentifier */
-            $firstIdentifier = current($identifier);
-            if (count($identifier) === 1 && $firstIdentifier->getPdoType() === \PDO::PARAM_INT) {
-                return array(__CLASS__, 'createChoiceName');
+            $firstIdentifier = \current($identifier);
+            if (1 === \count($identifier) && \PDO::PARAM_INT === $firstIdentifier->getPdoType()) {
+                return [__CLASS__, 'createChoiceName'];
             }
+
             return null;
         };
 
@@ -143,58 +144,64 @@ class ModelType extends AbstractType
             /** @var \ModelCriteria $query */
             $query = $options['query'];
             if ($options['index_property']) {
-                $identifier = array($query->getTableMap()->getColumn($options['index_property']));
+                $identifier = [$query->getTableMap()->getColumn($options['index_property'])];
             } else {
                 $identifier = $query->getTableMap()->getPrimaryKeys();
             }
+
             /** @var \ColumnMap $firstIdentifier */
-            $firstIdentifier = current($identifier);
-            if (count($identifier) === 1 && in_array($firstIdentifier->getPdoType(), [\PDO::PARAM_BOOL, \PDO::PARAM_INT, \PDO::PARAM_STR])) {
+            $firstIdentifier = \current($identifier);
+            if (1 === \count($identifier) && \in_array($firstIdentifier->getPdoType(), [\PDO::PARAM_BOOL, \PDO::PARAM_INT, \PDO::PARAM_STR])) {
                 return function($object) use ($firstIdentifier) {
                     if ($object) {
-                        return call_user_func([$object, 'get' . ucfirst($firstIdentifier->getPhpName())]);
+                        return \call_user_func([$object, 'get' . \ucfirst($firstIdentifier->getPhpName())]);
                     }
+
                     return null;
                 };
             }
+
             return null;
         };
 
         $queryNormalizer = function (Options $options, $query) {
-            if ($query === null) {
+            if (null === $query) {
                 $queryClass = $options['class'] . 'Query';
-                if (!class_exists($queryClass)) {
+                if (!\class_exists($queryClass)) {
                     if (empty($options['class'])) {
                         throw new MissingOptionsException('The "class" parameter is empty, you should provide the model class');
                     }
+
                     throw new InvalidOptionsException(
-                        sprintf(
+                        \sprintf(
                             'The query class "%s" is not found, you should provide the FQCN of the model class',
                             $queryClass
                         )
                     );
                 }
+
                 $query = new $queryClass();
             }
+
             return $query;
         };
 
         $choiceLabelNormalizer = function (Options $options, $choiceLabel) {
-            if ($choiceLabel === null) {
-                if ($options['property'] == null) {
-                    $choiceLabel = array(__CLASS__, 'createChoiceLabel');
+            if (null === $choiceLabel) {
+                if (null == $options['property']) {
+                    $choiceLabel = [__CLASS__, 'createChoiceLabel'];
                 } else {
                     $valueProperty = $options['property'];
                     /** @var \ModelCriteria $query */
                     $query = $options['query'];
 
                     $choiceLabel = function($choice) use ($valueProperty, $query) {
-                        $getter = 'get'.ucfirst($valueProperty);
-                        if (!method_exists($choice, $getter)) {
-                            $getter = 'get' . ucfirst($query->getTableMap()->getColumn($valueProperty)->getPhpName());
+                        $getter = 'get' . \ucfirst($valueProperty);
+                        if (!\method_exists($choice, $getter)) {
+                            $getter = 'get' . \ucfirst($query->getTableMap()->getColumn($valueProperty)->getPhpName());
                         }
 
-                        return call_user_func([$choice, $getter]);
+                        return \call_user_func([$choice, $getter]);
                     };
                 }
             }
@@ -215,18 +222,10 @@ class ModelType extends AbstractType
             'by_reference' => false,
         ]);
 
-        $resolver->setRequired(array('class'));
+        $resolver->setRequired(['class']);
         $resolver->setNormalizer('query', $queryNormalizer);
         $resolver->setNormalizer('choice_label', $choiceLabelNormalizer);
-        $resolver->setAllowedTypes('query', ['null', '\ModelCriteria']);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix()
-    {
-        return 'model';
+        $resolver->setAllowedTypes('query', ['null', \ModelCriteria::class]);
     }
 
     /**

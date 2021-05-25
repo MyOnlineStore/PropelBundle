@@ -7,11 +7,17 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle;
 
 use Propel\Bundle\PropelBundle\DependencyInjection\Security\UserProvider\PropelFactory;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+
+use function strncasecmp;
+
+use const PATH_SEPARATOR;
+use const PHP_SAPI;
 
 /**
  * PropelBundle.
@@ -25,12 +31,12 @@ class PropelBundle extends Bundle
      */
     public function boot()
     {
-        require_once $this->container->getParameter('propel.path').'/runtime/lib/Propel.php';
+        require_once $this->container->getParameter('propel.path') . '/runtime/lib/Propel.php';
 
-        if (0 === strncasecmp(PHP_SAPI, 'cli', 3)) {
-            \set_include_path($this->container->getParameter('kernel.project_dir').PATH_SEPARATOR.
-                             $this->container->getParameter('propel.phing_path').PATH_SEPARATOR.
-                             $this->container->getParameter('propel.phing_path').'/classes'.PATH_SEPARATOR.
+        if (0 === \strncasecmp(\PHP_SAPI, 'cli', 3)) {
+            \set_include_path($this->container->getParameter('kernel.project_dir') . \PATH_SEPARATOR .
+                             $this->container->getParameter('propel.phing_path') . \PATH_SEPARATOR .
+                             $this->container->getParameter('propel.phing_path') . '/classes' . \PATH_SEPARATOR .
                              \get_include_path());
         }
 
@@ -42,17 +48,17 @@ class PropelBundle extends Bundle
                     ->container
                     ->get('propel.configuration')
                     ;
-                $config->setParameter('debugpdo.logging.methods', array(
+                $config->setParameter('debugpdo.logging.methods', [
                     'PropelPDO::exec',
                     'PropelPDO::query',
                     'PropelPDO::prepare',
                     'DebugPDOStatement::execute',
-                ), false);
-                $config->setParameter('debugpdo.logging.details', array(
-                    'time' => array('enabled' => true),
-                    'mem' => array('enabled' => true),
-                    'connection' => array('enabled' => true),
-                ));
+                ], false);
+                $config->setParameter('debugpdo.logging.details', [
+                    'time' => ['enabled' => true],
+                    'mem' => ['enabled' => true],
+                    'connection' => ['enabled' => true],
+                ]);
 
                 \Propel::setLogger($this->container->get('propel.logger'));
             }
@@ -62,7 +68,7 @@ class PropelBundle extends Bundle
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritdoc}
      */
     public function build(ContainerBuilder $container)
     {

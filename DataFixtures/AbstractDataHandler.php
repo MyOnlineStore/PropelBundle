@@ -7,9 +7,9 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\DataFixtures;
 
-use Propel;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -59,8 +59,8 @@ abstract class AbstractDataHandler
             return;
         }
 
-        $this->dbMap = Propel::getDatabaseMap($connectionName);
-        if (0 === count($this->dbMap->getTables())) {
+        $this->dbMap = \Propel::getDatabaseMap($connectionName);
+        if (0 === \count($this->dbMap->getTables())) {
             $finder = new Finder();
             $files  = $finder->files()->name('*TableMap.php')
                 ->in($this->getModelSearchPaths($connectionName))
@@ -68,7 +68,7 @@ abstract class AbstractDataHandler
                 ->exclude('Tests');
 
             foreach ($files as $file) {
-                $class = $this->guessFullClassName($file->getRelativePath(), basename($file, '.php'));
+                $class = $this->guessFullClassName($file->getRelativePath(), \basename($file, '.php'));
 
                 if (null !== $class && $this->isInDatabase($class, $connectionName)) {
                     $this->dbMap->addTableFromMapClass($class);
@@ -79,15 +79,17 @@ abstract class AbstractDataHandler
 
     /**
      * Check if a table is in a database
-     * @param  string  $class
-     * @param  string  $connectionName
-     * @return boolean
+     *
+     * @param  string $class
+     * @param  string $connectionName
+     *
+     * @return bool
      */
     protected function isInDatabase($class, $connectionName)
     {
         $table = new $class();
 
-        return constant($table->getPeerClassname().'::DATABASE_NAME') == $connectionName;
+        return \constant($table->getPeerClassname() . '::DATABASE_NAME') == $connectionName;
     }
 
     /**
@@ -99,20 +101,20 @@ abstract class AbstractDataHandler
      */
     private function guessFullClassName($path, $shortClassName)
     {
-        $array = array();
-        $path  = str_replace('/', '\\', $path);
+        $array = [];
+        $path  = \str_replace('/', '\\', $path);
 
         $array[] = $path;
-        while ($pos = strpos($path, '\\')) {
-            $path = substr($path, $pos + 1, strlen($path));
+        while ($pos = \strpos($path, '\\')) {
+            $path = \substr($path, $pos + 1, \strlen($path));
             $array[] = $path;
         }
 
-        $array = array_reverse($array);
-        while ($ns = array_pop($array)) {
+        $array = \array_reverse($array);
+        while ($ns = \array_pop($array)) {
 
             $class = $ns . '\\' . $shortClassName;
-            if (class_exists($class)) {
+            if (\class_exists($class)) {
                 return $class;
             }
         }
@@ -128,8 +130,8 @@ abstract class AbstractDataHandler
      * @return string[]
      */
     protected function getModelSearchPaths($connectionName) {
-        $configuration = Propel::getConfiguration();
-        $searchPath = array();
+        $configuration = \Propel::getConfiguration();
+        $searchPath = [];
 
         if (!empty($configuration['datasources'][$connectionName]['connection']['model_paths'])) {
             $modelPaths = $configuration['datasources'][$connectionName]['connection']['model_paths'];

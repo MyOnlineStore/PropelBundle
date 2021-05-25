@@ -45,7 +45,7 @@ propel:
         attributes:           {}
 ```
 
-## Configure Multiple Connection ##
+## Configure Multiple Connection ##
 
 If you have more than one connection, or want to use a named connection, the configuration
 will look like:
@@ -104,7 +104,7 @@ propel:
         default_connection:         default
         connections:
             default:
-                # ...
+                # ...
                 options:
                     ATTR_PERSISTENT: false
                 attributes:

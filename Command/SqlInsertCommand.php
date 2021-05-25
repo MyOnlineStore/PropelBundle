@@ -7,8 +7,10 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Command;
 
+use Propel\Bundle\PropelBundle\Command\AbstractCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -48,7 +50,7 @@ EOT
      *
      * @throws \InvalidArgumentException When the target directory does not exist
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if ($input->getOption('force')) {
             $connections = $this->getConnections();
@@ -59,23 +61,28 @@ EOT
             $manager->setConnections($connections);
 
             if ($input->getOption('connection')) {
-                list($name, $config) = $this->getConnection($input, $output);
+                [$name, $config] = $this->getConnection($input, $output);
                 $this->doSqlInsert($manager, $output, $name);
             } else {
                 foreach ($connections as $name => $config) {
-                    $output->writeln(sprintf('Use connection named <comment>%s</comment> in <comment>%s</comment> environment.',
-                        $name, $this->getApplication()->getKernel()->getEnvironment()));
+                    $output->writeln(\sprintf(
+                        'Use connection named <comment>%s</comment> in <comment>%s</comment> environment.',
+                        $name,
+                        $this->getApplication()->getKernel()->getEnvironment()
+                    ));
                     $this->doSqlInsert($manager, $output, $name);
                 }
             }
         } else {
             $output->writeln('<error>You have to use --force to execute all SQL statements.</error>');
         }
+
+        return 0;
     }
 
     protected function getSqlDir()
     {
-        return sprintf('%s/propel/sql', $this->getApplication()->getKernel()->getCacheDir());
+        return \sprintf('%s/propel/sql', $this->getApplication()->getKernel()->getCacheDir());
     }
 
     /**
@@ -87,10 +94,10 @@ EOT
     {
         try {
             $statusCode = $manager->insertSql($connectionName);
-        } catch (\Exception $e) {
+        } catch (\Throwable $exception) {
             return $this->writeSection(
                 $output,
-                array('[Propel] Exception', '', $e),
+                ['[Propel] Exception', '', $exception],
                 'fg=white;bg=red'
             );
         }
@@ -109,9 +116,9 @@ EOT
     {
         $propelConfiguration = $this->getContainer()->get('propel.configuration');
 
-        $connections = array();
+        $connections = [];
         foreach ($propelConfiguration['datasources'] as $name => $config) {
-            if (is_scalar($config)) {
+            if (\is_scalar($config)) {
                 continue;
             }
 

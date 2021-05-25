@@ -7,11 +7,15 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Tests\Command;
 
 use Propel\Bundle\PropelBundle\Command\GeneratorAwareCommand;
 use Propel\Bundle\PropelBundle\Tests\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+
+use function count;
+use function is_array;
 
 /**
  * @author William Durand <william.durand1@gmail.com>
@@ -20,7 +24,7 @@ class GeneratorAwareCommandTest extends TestCase
 {
     protected $container;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -34,17 +38,17 @@ class GeneratorAwareCommandTest extends TestCase
         $command->setContainer($this->container);
         $databases = $command->getDatabasesFromSchema(new \SplFileInfo(__DIR__ . '/../Fixtures/schema.xml'));
 
-        $this->assertTrue(is_array($databases));
+        self::assertTrue(\is_array($databases));
 
         foreach ($databases as $database) {
-            $this->assertInstanceOf('\Database', $database);
+            self::assertInstanceOf('\Database', $database);
         }
 
         $bookstore = $databases[0];
-        $this->assertEquals(1, count($bookstore->getTables()));
+        self::assertEquals(1, \count($bookstore->getTables()));
 
         foreach ($bookstore->getTables() as $table) {
-            $this->assertInstanceOf('\Table', $table);
+            self::assertInstanceOf('\Table', $table);
         }
     }
 }

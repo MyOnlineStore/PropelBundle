@@ -7,9 +7,12 @@ use Propel\Bundle\PropelBundle\Tests\TestCase;
 use Propel\Bundle\PropelBundle\Translation\ModelTranslation;
 use Symfony\Component\Translation\MessageCatalogue;
 
+use function class_exists;
+use function date;
+use function file_get_contents;
+
 /**
  * @author Toni Uebernickel <tuebernickel@gmail.com>
- *
  * @covers Propel\Bundle\PropelBundle\Translation\ModelTranslation
  */
 class ModelTranslationTest extends TestCase
@@ -21,18 +24,18 @@ class ModelTranslationTest extends TestCase
      */
     protected $con;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
         $this->loadPropelQuickBuilder();
 
-        $schema = file_get_contents(__DIR__.'/../Fixtures/translation_schema.xml');
+        $schema = \file_get_contents(__DIR__ . '/../Fixtures/translation_schema.xml');
 
         $builder = new \PropelQuickBuilder();
         $builder->setSchema($schema);
-        if (class_exists('Propel\Bundle\PropelBundle\Tests\Fixtures\Model\map\TranslationTableMap')) {
-            $builder->setClassTargets(array());
+        if (\class_exists('Propel\Bundle\PropelBundle\Tests\Fixtures\Model\map\TranslationTableMap')) {
+            $builder->setClassTargets([]);
         }
 
         $this->con = $builder->build();
@@ -53,7 +56,7 @@ class ModelTranslationTest extends TestCase
         $resource = $this->getResource();
 
         $translator = $this->getMockBuilder('Symfony\Component\Translation\Translator')
-            ->setConstructorArgs(array('en_US'))
+            ->setConstructorArgs(['en_US'])
             ->getMock();
         $translator
             ->expects($this->once())
@@ -68,7 +71,7 @@ class ModelTranslationTest extends TestCase
     {
         $resource = $this->getResource();
 
-        $this->assertTrue($resource->isFresh(date('U')));
+        self::assertTrue($resource->isFresh(\date('U')));
     }
 
     public function testIsFreshUpdates()
@@ -89,7 +92,7 @@ class ModelTranslationTest extends TestCase
 
         $timestamp = (int) $date->format('U');
 
-        $this->assertFalse($resource->isFresh($timestamp - 10));
+        self::assertFalse($resource->isFresh($timestamp - 10));
     }
 
     public function testLoadInvalidResource()
@@ -99,7 +102,7 @@ class ModelTranslationTest extends TestCase
         $resource = $this->getResource();
         $catalogue = $resource->load($invalidResource, 'en_US');
 
-        $this->assertEmpty($catalogue->getResources());
+        self::assertEmpty($catalogue->getResources());
     }
 
     public function testLoadFiltersLocaleAndDomain()
@@ -141,66 +144,66 @@ class ModelTranslationTest extends TestCase
         $resource = $this->getResource();
         $catalogue = $resource->load($resource, 'en_US', 'test');
 
-        $this->assertInstanceOf('Symfony\Component\Translation\MessageCatalogue', $catalogue);
-        $this->assertEquals('en_US', $catalogue->getLocale());
+        self::assertInstanceOf('Symfony\Component\Translation\MessageCatalogue', $catalogue);
+        self::assertEquals('en_US', $catalogue->getLocale());
 
-        $expected = array(
-            'test' => array(
+        $expected = [
+            'test' => [
                 'example.key' => 'This is an example translation.',
-            ),
-        );
+            ],
+        ];
 
-        $this->assertEquals($expected, $catalogue->all());
+        self::assertEquals($expected, $catalogue->all());
     }
 
     public function testDump()
     {
-        $catalogue = new MessageCatalogue('en_US', array(
-            'test' => array(
+        $catalogue = new MessageCatalogue('en_US', [
+            'test' => [
                 'example.key' => 'This is an example translation.',
-            ),
-            'test2' => array(
+            ],
+            'test2' => [
                 'example.key' => 'This is an example translation.',
-            ),
-        ));
+            ],
+        ]);
 
         $resource = $this->getResource();
-        $this->assertEmpty($resource->load($resource, 'en_US', 'test')->all());
+        self::assertEmpty($resource->load($resource, 'en_US', 'test')->all());
 
         $resource->dump($catalogue);
 
         $stmt = $this->con->prepare('SELECT `key`, `message`, `locale`, `domain` FROM `translation`;');
         $stmt->execute();
 
-        $result = array();
+        $result = [];
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $result[] = $row;
         }
 
-        $expected = array(
-            array(
+        $expected = [
+            [
                 'key' => 'example.key',
                 'message' => 'This is an example translation.',
                 'locale' => 'en_US',
                 'domain' => 'test',
-            ),
-            array(
+            ],
+            [
                 'key' => 'example.key',
                 'message' => 'This is an example translation.',
                 'locale' => 'en_US',
                 'domain' => 'test2',
-            ),
-        );
+            ],
+        ];
 
-        $this->assertEquals($expected, $result);
+        self::assertEquals($expected, $result);
     }
 
     protected function getResource()
     {
-        return new ModelTranslation(self::MODEL_CLASS, array(
-            'columns' => array(
+        return new ModelTranslation(self::MODEL_CLASS, [
+            'columns' => [
                 'translation' => 'message',
-            ),
-        ));
+            ],
+        ]);
     }
 }

@@ -7,6 +7,7 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Tests\Util;
 
 use Propel\Bundle\PropelBundle\Tests\TestCase;
@@ -22,24 +23,22 @@ class PropelInflectorTest extends TestCase
      */
     public function testCamelize($word, $expected)
     {
-        $this->assertEquals($expected, PropelInflector::camelize($word));
+        self::assertEquals($expected, PropelInflector::camelize($word));
     }
 
-    public static function dataProviderForTestCamelize()
+    public static function dataProviderForTestCamelize(): \Iterator
     {
-        return array(
-            array('', ''),
-            array(null, null),
-            array('foo', 'foo'),
-            array('Foo', 'foo'),
-            array('fooBar', 'fooBar'),
-            array('FooBar', 'fooBar'),
-            array('Foo_bar', 'fooBar'),
-            array('Foo_Bar', 'fooBar'),
-            array('Foo Bar', 'fooBar'),
-            array('Foo bar Baz', 'fooBarBaz'),
-            array('Foo_Bar_Baz', 'fooBarBaz'),
-            array('foo_bar_baz', 'fooBarBaz'),
-        );
+        yield ['', ''];
+        yield [null, null];
+        yield ['foo', 'foo'];
+        yield ['Foo', 'foo'];
+        yield ['fooBar', 'fooBar'];
+        yield ['FooBar', 'fooBar'];
+        yield ['Foo_bar', 'fooBar'];
+        yield ['Foo_Bar', 'fooBar'];
+        yield ['Foo Bar', 'fooBar'];
+        yield ['Foo bar Baz', 'fooBarBaz'];
+        yield ['Foo_Bar_Baz', 'fooBarBaz'];
+        yield ['foo_bar_baz', 'fooBarBaz'];
     }
 }

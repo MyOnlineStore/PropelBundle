@@ -7,10 +7,14 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Command;
 
+use Propel\Bundle\PropelBundle\Command\AbstractCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+
+use const PATH_SEPARATOR;
 
 /**
  * @author William Durand <william.durand1@gmail.com>
@@ -31,11 +35,11 @@ abstract class GeneratorAwareCommand extends AbstractCommand
     {
         $propelPath = $this->getContainer()->getParameter('propel.path');
 
-        require_once sprintf('%s/generator/lib/builder/util/XmlToAppData.php',   $propelPath);
-        require_once sprintf('%s/generator/lib/config/GeneratorConfig.php',      $propelPath);
-        require_once sprintf('%s/generator/lib/config/QuickGeneratorConfig.php', $propelPath);
+        require_once \sprintf('%s/generator/lib/builder/util/XmlToAppData.php',   $propelPath);
+        require_once \sprintf('%s/generator/lib/config/GeneratorConfig.php',      $propelPath);
+        require_once \sprintf('%s/generator/lib/config/QuickGeneratorConfig.php', $propelPath);
 
-        set_include_path(sprintf('%s/generator/lib', $propelPath) . PATH_SEPARATOR . get_include_path());
+        \set_include_path(\sprintf('%s/generator/lib', $propelPath) . \PATH_SEPARATOR . \get_include_path());
     }
 
     protected function getDatabasesFromSchema(\SplFileInfo $file, \XmlToAppData $transformer = null)
@@ -48,13 +52,13 @@ abstract class GeneratorAwareCommand extends AbstractCommand
 
         if (\file_exists($propelIni = $this->getContainer()->getParameter('kernel.project_dir') . '/app/config/propel.ini')) {
             foreach ($this->getProperties($propelIni) as $key => $value) {
-                if (0 === strpos($key, 'propel.')) {
-                    $newKey = substr($key, strlen('propel.'));
+                if (0 === \strpos($key, 'propel.')) {
+                    $newKey = \substr($key, \strlen('propel.'));
 
-                    $j = strpos($newKey, '.');
+                    $j = \strpos($newKey, '.');
                     while (false !== $j) {
-                        $newKey = substr($newKey, 0, $j) . ucfirst(substr($newKey, $j + 1));
-                        $j = strpos($newKey, '.');
+                        $newKey = \substr($newKey, 0, $j) . \ucfirst(\substr($newKey, $j + 1));
+                        $j = \strpos($newKey, '.');
                     }
 
                     $config->setBuildProperty($newKey, $value);

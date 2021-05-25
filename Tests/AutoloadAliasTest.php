@@ -2,9 +2,10 @@
 
 namespace Propel\Bundle\PropelBundle\Tests;
 
+use PHPUnit\Framework\TestCase;
 use Propel\Bundle\PropelBundle\Util\PropelInflector;
 
-class AutoloadAliasTest extends \PHPUnit_Framework_TestCase
+class AutoloadAliasTest extends TestCase
 {
     public function testOldNamespaceWorks()
     {

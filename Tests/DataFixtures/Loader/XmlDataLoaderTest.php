@@ -7,10 +7,12 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Tests\DataFixtures\Loader;
 
 use Propel\Bundle\PropelBundle\DataFixtures\Loader\XmlDataLoader;
 use Propel\Bundle\PropelBundle\Tests\DataFixtures\TestCase;
+use Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookPeer;
 
 /**
  * @author William Durand <william.durand1@gmail.com>
@@ -33,13 +35,13 @@ XML;
 
         $filename = $this->getTempFile($fixtures);
 
-        $loader = new XmlDataLoader(__DIR__.'/../../Fixtures/DataFixtures/Loader');
-        $loader->load(array($filename), 'default');
+        $loader = new XmlDataLoader(__DIR__ . '/../../Fixtures/DataFixtures/Loader');
+        $loader->load([$filename], 'default');
 
-        $books = \Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookPeer::doSelect(new \Criteria(), $this->con);
-        $this->assertCount(1, $books);
+        $books = BookPeer::doSelect(new \Criteria(), $this->con);
+        self::assertCount(1, $books);
 
         $book = $books[0];
-        $this->assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthor', $book->getBookAuthor());
+        self::assertInstanceOf('Propel\Bundle\PropelBundle\Tests\Fixtures\DataFixtures\Loader\BookAuthor', $book->getBookAuthor());
     }
 }

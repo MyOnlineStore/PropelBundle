@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd"
+>
+    <arg name="basepath" value="."/>
+    <arg name="parallel" value="80"/>
+    <arg name="cache" value=".phpcs-cache"/>
+    <arg name="colors"/>
+    <arg name="extensions" value="php"/>
+    <arg value="sp"/>
+
+    <file>Command</file>
+    <file>Controller</file>
+    <file>DataCollector</file>
+    <file>DataFixtures</file>
+    <file>DependencyInjection</file>
+    <file>Form</file>
+    <file>Logger</file>
+    <file>Request</file>
+    <file>Resources</file>
+    <file>Security</file>
+    <file>Tests</file>
+    <file>Translation</file>
+    <file>Twig</file>
+    <file>Util</file>
+    <file>Validator</file>
+    <file>PropelBundle.php</file>
+
+    <rule ref="MyOnlineStore">
+        <exclude name="SlevomatCodingStandard.Classes.SuperfluousInterfaceNaming.SuperfluousSuffix"/>
+    </rule>
+</ruleset>

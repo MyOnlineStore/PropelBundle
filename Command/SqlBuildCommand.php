@@ -7,13 +7,18 @@
  *
  * @license    MIT License
  */
+
 namespace Propel\Bundle\PropelBundle\Command;
 
+use Propel\Bundle\PropelBundle\Command\AbstractCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+
+use const DIRECTORY_SEPARATOR;
+use const PATHINFO_EXTENSION;
 
 /**
  * SqlBuildCommand.
@@ -46,20 +51,20 @@ EOT
      *
      * @throws \InvalidArgumentException When the target directory does not exist
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $finder = new Finder();
         $filesystem = new Filesystem();
 
-        $sqlDir = $this->getApplication()->getKernel()->getCacheDir().DIRECTORY_SEPARATOR.'propel'.DIRECTORY_SEPARATOR.'sql';
+        $sqlDir = $this->getApplication()->getKernel()->getCacheDir() . \DIRECTORY_SEPARATOR . 'propel' . \DIRECTORY_SEPARATOR . 'sql';
 
         $filesystem->remove($sqlDir);
         $filesystem->mkdir($sqlDir);
 
         // Execute the task
-        $ret = $this->callPhing('build-sql', array(
+        $ret = $this->callPhing('build-sql', [
             'propel.sql.dir' => $sqlDir,
-        ));
+        ]);
 
         // Show the list of generated files
         if (true === $ret) {
@@ -67,10 +72,10 @@ EOT
 
             $nbFiles = 0;
             foreach ($files as $file) {
-                $fileExt = pathinfo($file->getFilename(), PATHINFO_EXTENSION);
-                $finalLocation = $sqlDir.DIRECTORY_SEPARATOR.$file->getFilename();
+                $fileExt = \pathinfo($file->getFilename(), \PATHINFO_EXTENSION);
+                $finalLocation = $sqlDir . \DIRECTORY_SEPARATOR . $file->getFilename();
 
-                if ($fileExt === 'map' && $filesystem->exists($finalLocation)) {
+                if ('map' === $fileExt && $filesystem->exists($finalLocation)) {
                     $this->mergeMapFiles($finalLocation, (string) $file);
                 }
 
@@ -81,16 +86,21 @@ EOT
                 }
             }
 
-            $output->writeln(sprintf('<comment>%d</comment> <info>SQL file%s ha%s been generated.</info>',
-                $nbFiles, $nbFiles > 1 ? 's' : '', $nbFiles > 1 ? 've' : 's'
+            $output->writeln(\sprintf(
+                '<comment>%d</comment> <info>SQL file%s ha%s been generated.</info>',
+                $nbFiles,
+                $nbFiles > 1 ? 's' : '',
+                $nbFiles > 1 ? 've' : 's'
             ));
         } else {
-            $this->writeSection($output, array(
+            $this->writeSection($output, [
                 '[Propel] Error',
                 '',
                 'An error has occured during the "propel:sql:build" command process. To get more details, run the command with the "--verbose" option.',
-            ), 'fg=white;bg=red');
+            ], 'fg=white;bg=red');
         }
+
+        return 0;
     }
 
     /**
@@ -104,16 +114,16 @@ EOT
      */
     protected function mergeMapFiles($target, $generated)
     {
-        if (false === ($targetContent = file($target))) {
+        if (false === ($targetContent = \file($target))) {
             return false;
         }
 
-        if (false === ($generatedContent = file($generated))) {
+        if (false === ($generatedContent = \file($generated))) {
             return false;
         }
 
-        $targetContent = array_merge($generatedContent, array_diff($targetContent, $generatedContent));
+        $targetContent = \array_merge($generatedContent, \array_diff($targetContent, $generatedContent));
 
-        return file_put_contents($target, $targetContent);
+        return \file_put_contents($target, $targetContent);
     }
 }
